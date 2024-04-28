@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import MyLogo from "../components/MyLogo";
 import { validatePassword, validateUsername } from "../utils";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { authActions } from "../store/authSlice";
 import { users } from "../data";
 import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
@@ -33,12 +33,13 @@ const Auth = () => {
 
     if (username && password) {
       // should do: check credentials in database
-      if (
-        users.find((item) => item.username === username)?.password === password
-      ) {
-        const id = Math.floor(Math.random() * 999) + 100;
-        dispatch(authActions.login({ id, username }));
-        localStorage.setItem("user", JSON.stringify({ id, username }));
+      const user = users.find((item) => item.username === username);
+
+      if (user?.password === password) {
+        const { password, ...userWithoutPassword } = user;
+
+        dispatch(authActions.login(userWithoutPassword));
+        localStorage.setItem("user", JSON.stringify(userWithoutPassword));
       } else {
         alert("Account not registered / wrong credentials!");
         setUsername("");

@@ -16,6 +16,7 @@
     "@mui/material": "^5.15.15",
     "@mui/x-data-grid": "^7.3.0",
     "@reduxjs/toolkit": "^2.2.3",
+    "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "react": "^18.2.0",
     "react-calendar": "^4.8.0",

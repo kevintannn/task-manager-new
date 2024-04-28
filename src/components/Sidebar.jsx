@@ -21,13 +21,13 @@ const Sidebar = () => {
   const { pathname } = useLocation();
 
   return (
-    <div className="flex h-screen flex-col items-center justify-between p-5">
+    <div className="fixed flex h-screen flex-col items-center justify-between p-5">
       {/* logo and sidebar links */}
       <div className="flex flex-col items-center justify-center gap-10">
         {/* logo */}
-        <div>
+        <Link to={"/"}>
           <MyLogo />
-        </div>
+        </Link>
 
         {/* sidebar links */}
         <div className="flex flex-col items-center justify-center gap-5">
@@ -35,7 +35,7 @@ const Sidebar = () => {
             <Link
               key={idx}
               to={item.link}
-              className={`${pathname === item.link ? "shadow-md" : "bg-blue-100/50"} flex h-fit w-fit items-center justify-center rounded-lg p-3 duration-150 hover:bg-gray-200`}
+              className={`${pathname === item.link ? "shadow-md" : "bg-blue-100/80"} flex h-fit w-fit items-center justify-center rounded-lg p-3 duration-150 hover:bg-white hover:shadow-md`}
             >
               {item.icon}
             </Link>

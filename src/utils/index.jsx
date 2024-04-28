@@ -17,3 +17,35 @@ export const validatePassword = (password) => {
 
   return null;
 };
+
+export const validateTaskTitle = (title) => {
+  return null;
+};
+
+export const validateTaskPriority = (priority) => {
+  return null;
+};
+
+export const validateTaskDivision = (division) => {
+  return null;
+};
+
+export const validateTaskPeople = (people) => {
+  return null;
+};
+
+export const validateDate = (startDate, endDate) => {
+  if (startDate === "" || endDate === "") {
+    return null;
+  }
+
+  if (startDate > endDate) {
+    return "Start date can not be higher than end date";
+  }
+
+  if (startDate === endDate) {
+    return "Start date can not be the same as end date";
+  }
+
+  return null;
+};

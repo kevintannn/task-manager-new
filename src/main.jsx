@@ -8,6 +8,8 @@ import store from "./store/index.jsx";
 import { Provider } from "react-redux";
 import Dashboard from "./screens/Dashboard.jsx";
 import Profile from "./screens/Profile.jsx";
+import CreateTask from "./screens/CreateTask.jsx";
+import ViewTask from "./screens/ViewTask.jsx";
 
 const router = createBrowserRouter([
   {
@@ -18,6 +20,14 @@ const router = createBrowserRouter([
       {
         path: "/",
         element: <Dashboard />,
+      },
+      {
+        path: "/tasks/create",
+        element: <CreateTask />,
+      },
+      {
+        path: "/tasks/:id",
+        element: <ViewTask />,
       },
       {
         path: "people",

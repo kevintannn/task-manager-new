@@ -1,5 +1,5 @@
-import AddIcon from "@mui/icons-material/Add";
 // import "react-calendar/dist/Calendar.css";
+import AddIcon from "@mui/icons-material/Add";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import "../calendar.css";
@@ -20,17 +20,22 @@ import {
 } from "@mui/material";
 import Calendar from "react-calendar";
 import ActivityBox from "../components/ActivityBox";
-import { activities, projects, tasks } from "../data";
+import { activities, projects } from "../data";
 import { useState } from "react";
 import { format } from "date-fns";
 import PrimaryButton from "../components/PrimaryButton";
+import { useSelector } from "react-redux";
 
 const Dashboard = () => {
+  const tasks = useSelector((state) => state.task.tasks);
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredTasks = tasks.filter(
-    (item) => item.startdatetime.toDateString() === selectedDate.toDateString(),
+    (item) =>
+      new Date(item.startDateTime).toDateString() ===
+      selectedDate.toDateString(),
   );
 
   const pageSize = 6;
@@ -58,7 +63,7 @@ const Dashboard = () => {
                   : "Task of " + format(selectedDate, "dd MMMM yyyy")}
               </h1>
 
-              <PrimaryButton>
+              <PrimaryButton type="link" href={"/tasks/create"}>
                 <AddIcon className="absolute -mt-0.5" fontSize="small" />
                 <span className="ml-7 mr-1">Create New Task</span>
               </PrimaryButton>
@@ -176,7 +181,9 @@ const Dashboard = () => {
                   <TableBody>
                     {projects.map((item, idx) => (
                       <TableRow key={idx}>
-                        <TableCell>{item.name}</TableCell>
+                        <TableCell sx={{ fontWeight: "bold" }}>
+                          {item.name}
+                        </TableCell>
                         <TableCell>{item.deadline}</TableCell>
                         <TableCell>{item.type}</TableCell>
                         <TableCell>
