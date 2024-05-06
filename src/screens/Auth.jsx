@@ -36,7 +36,7 @@ const Auth = () => {
       const user = users.find((item) => item.username === username);
 
       if (user?.password === password) {
-        const { password, ...userWithoutPassword } = user;
+        const { password, ...userWithoutPassword } = user; // password is only to filter it out
 
         dispatch(authActions.login(userWithoutPassword));
         localStorage.setItem("user", JSON.stringify(userWithoutPassword));

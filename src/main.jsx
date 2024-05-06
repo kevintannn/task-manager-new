@@ -10,6 +10,8 @@ import Dashboard from "./screens/Dashboard.jsx";
 import Profile from "./screens/Profile.jsx";
 import CreateTask from "./screens/CreateTask.jsx";
 import ViewTask from "./screens/ViewTask.jsx";
+import EditTask from "./screens/EditTask.jsx";
+import People from "./screens/People.jsx";
 
 const router = createBrowserRouter([
   {
@@ -30,8 +32,12 @@ const router = createBrowserRouter([
         element: <ViewTask />,
       },
       {
+        path: "/tasks/:id/edit",
+        element: <EditTask />,
+      },
+      {
         path: "people",
-        element: <div>People</div>,
+        element: <People />,
       },
       {
         path: "/profile",

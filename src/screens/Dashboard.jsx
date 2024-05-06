@@ -70,11 +70,19 @@ const Dashboard = () => {
             </div>
 
             {/* cards */}
-            <div className="grid grid-cols-3 gap-4">
-              {paginatedTasks.map((item, idx) => (
-                <Card key={idx} task={item} />
-              ))}
-            </div>
+            {filteredTasks.length > 0 && (
+              <div className="grid grid-cols-3 gap-4">
+                {paginatedTasks.map((item, idx) => (
+                  <Card key={idx} task={item} />
+                ))}
+              </div>
+            )}
+
+            {filteredTasks.length === 0 && (
+              <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+                <p>There is no task</p>
+              </div>
+            )}
 
             {/* pagination buttons */}
             <div className="flex items-center gap-3 self-end text-xs">

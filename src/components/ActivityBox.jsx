@@ -22,7 +22,9 @@ const ActivityBox = ({ activities }) => {
 
               <div className="flex flex-col gap-1 text-gray-500">
                 <p>
-                  <span className="font-bold text-black">{item.name}</span>{" "}
+                  <span className="font-bold text-black">
+                    {item.name.split(" ")[0]}
+                  </span>{" "}
                   {item.activity}
                 </p>
 

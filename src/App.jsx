@@ -26,12 +26,12 @@ const App = () => {
   return (
     !loading && (
       <>
+        <Notification notification={notification} />
+
         {!auth.user.id && <Auth />}
 
         {auth.user.id && (
-          <div className="flex">
-            <Notification notification={notification} />
-
+          <div className="flex h-screen">
             {/* 
             for sidebar to be fixed,
             there needs to be a background width of 84px,
@@ -59,6 +59,7 @@ const Notification = ({ notification }) => {
 
   return (
     <Snackbar
+      autoHideDuration={10000}
       anchorOrigin={{ vertical: "top", horizontal: "right" }}
       open={notification.open}
     >

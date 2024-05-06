@@ -9,10 +9,11 @@ import {
   validateTaskPriority,
   validateTaskTitle,
 } from "../utils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { taskActions } from "../store/taskSlice";
 import { uiActions } from "../store/uiSlice";
+import { format } from "date-fns";
+import { taskActions } from "../store/taskSlice";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -24,17 +25,30 @@ const MenuProps = {
   },
 };
 
-const CreateTask = () => {
+const EditTask = () => {
+  const { id } = useParams();
+
   const user = useSelector((state) => state.auth.user);
+  const tasks = useSelector((state) => state.task.tasks);
   const dispatch = useDispatch();
 
-  const [title, setTitle] = useState("");
-  const [priority, setPriority] = useState("-1");
-  const [division, setDivision] = useState("-1");
-  const [selectedPeople, setSelectedPeople] = useState([]);
-  const [description, setDescription] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const task = tasks.find((item) => item.id == id);
+
+  const [title, setTitle] = useState(task?.title);
+  const [priority, setPriority] = useState(task?.priority);
+  const [division, setDivision] = useState(task?.division);
+  const [selectedPeople, setSelectedPeople] = useState(task.people.slice(1));
+  const [description, setDescription] = useState(task.description);
+  const [startDate, setStartDate] = useState(
+    format(task.startDateTime, "yyyy-MM-dd") +
+      "T" +
+      format(task.startDateTime, "HH:mm"),
+  );
+  const [endDate, setEndDate] = useState(
+    format(task.endDateTime, "yyyy-MM-dd") +
+      "T" +
+      format(task.endDateTime, "HH:mm"),
+  );
 
   const [titleError, setTitleError] = useState(null);
   const [priorityError, setPriorityError] = useState(null);
@@ -49,7 +63,7 @@ const CreateTask = () => {
     setSelectedPeopleError(validateTaskPeople(e.target.value));
   };
 
-  const handleCreateTask = () => {
+  const handleEditTask = () => {
     if (
       title === "" ||
       priority === "-1" ||
@@ -91,46 +105,47 @@ const CreateTask = () => {
       return;
     }
 
-    // insert into database
-    const newTask = {
-      id: Math.ceil(Math.random() * 999) + 100,
-      title,
-      description,
-      priority: priority,
-      division,
-      people: [user.id, ...selectedPeople],
-      startDateTime: startDate,
-      endDateTime: endDate,
-      completed: false,
-      completedBy: null,
-      createdBy: user.id,
-      createdAt: new Date(),
-    };
-
+    // update database
     const existingTasksJSON = localStorage.getItem("tasks");
     const existingTasks = existingTasksJSON
-      ? JSON.parse(existingTasksJSON)
+      ? JSON.parse(existingTasksJSON).map((item) => {
+          if (item.id == id) {
+            return {
+              ...item,
+              title,
+              description,
+              priority: priority.toLowerCase(),
+              division,
+              people: [user.id, ...selectedPeople],
+              startDateTime: startDate,
+              endDateTime: endDate,
+              updatedBy: user.id,
+              updatedAt: new Date(),
+            };
+          }
+
+          return item;
+        })
       : [];
 
-    existingTasks.push(newTask);
     localStorage.setItem("tasks", JSON.stringify(existingTasks));
 
-    dispatch(taskActions.addTask(newTask));
+    dispatch(taskActions.replaceTasks(existingTasks));
 
     dispatch(
       uiActions.setNotification({
         type: "success",
-        message: "New task created!",
+        message: "Task updated!",
         open: true,
       }),
     );
 
-    return navigate("/");
+    return navigate(-1);
   };
 
   return (
     <div className="flex h-full flex-col justify-center gap-5">
-      <h1 className="text-2xl font-bold">Create New Task</h1>
+      <h1 className="text-2xl font-bold">Edit Task</h1>
 
       <div className="flex justify-center gap-5 rounded-xl bg-blue-50/50  p-10">
         {/* left section */}
@@ -225,6 +240,7 @@ const CreateTask = () => {
                 .map((item) => (
                   <MenuItem key={item.id} value={item.id}>
                     <Checkbox checked={selectedPeople.indexOf(item.id) > -1} />
+
                     <ListItemText primary={item.name} />
                   </MenuItem>
                 ))}
@@ -259,6 +275,7 @@ const CreateTask = () => {
                 id="startDate"
                 value={startDate}
                 onChange={(e) => {
+                  console.log(e.target.value);
                   setStartDate(e.target.value);
                   setDateError(validateDate(e.target.value, endDate));
                 }}
@@ -283,11 +300,8 @@ const CreateTask = () => {
           </div>
 
           {/* create button */}
-          <PrimaryButton
-            cname={"justify-center"}
-            handleClick={handleCreateTask}
-          >
-            Create Task
+          <PrimaryButton cname={"justify-center"} handleClick={handleEditTask}>
+            Update Task
           </PrimaryButton>
         </div>
       </div>
@@ -295,4 +309,4 @@ const CreateTask = () => {
   );
 };
 
-export default CreateTask;
+export default EditTask;
