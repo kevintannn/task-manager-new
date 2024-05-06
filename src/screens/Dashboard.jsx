@@ -10,6 +10,13 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Card from "../components/Card";
 import TopBar from "../components/TopBar";
 import PersonImg from "../assets/asd.jpg";
+import Calendar from "react-calendar";
+import ActivityBox from "../components/ActivityBox";
+import { activities, projects } from "../data";
+import { useState } from "react";
+import { format } from "date-fns";
+import PrimaryButton from "../components/PrimaryButton";
+import { useSelector } from "react-redux";
 import {
   Table,
   TableBody,
@@ -18,36 +25,39 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
-import Calendar from "react-calendar";
-import ActivityBox from "../components/ActivityBox";
-import { activities, projects } from "../data";
-import { useState } from "react";
-import { format } from "date-fns";
-import PrimaryButton from "../components/PrimaryButton";
-import { useSelector } from "react-redux";
 
 const Dashboard = () => {
   const tasks = useSelector((state) => state.task.tasks);
 
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(
+    new Date(new Date().toDateString()),
+  );
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
 
-  const filteredTasks = tasks.filter(
-    (item) =>
-      new Date(item.startDateTime).toDateString() ===
-      selectedDate.toDateString(),
+  const filteredTasks = tasks.filter((item) => {
+    const startDate = new Date(new Date(item.startDateTime).toDateString()); // the purpose of nesting new Date() is to set the hours to 00:00:00 so we only compare date
+    const endDate = new Date(new Date(item.endDateTime).toDateString());
+
+    if (startDate <= selectedDate && endDate >= selectedDate) {
+      return item;
+    }
+  });
+
+  const searchedTasks = filteredTasks.filter((item) =>
+    item.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   const pageSize = 6;
-  const totalPages = Math.ceil(filteredTasks.length / pageSize);
+  const totalPages = Math.ceil(searchedTasks.length / pageSize);
   const startIdx = (currentPage - 1) * pageSize;
-  const paginatedTasks = filteredTasks.slice(startIdx, startIdx + pageSize);
+  const paginatedTasks = searchedTasks.slice(startIdx, startIdx + pageSize);
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
 
   return (
     <div className="flex flex-col">
-      <TopBar />
+      <TopBar search={search} setSearch={setSearch} />
 
       {/* left and right section */}
       <div className="my-10 flex gap-5">
@@ -70,7 +80,7 @@ const Dashboard = () => {
             </div>
 
             {/* cards */}
-            {filteredTasks.length > 0 && (
+            {searchedTasks.length > 0 && (
               <div className="grid grid-cols-3 gap-4">
                 {paginatedTasks.map((item, idx) => (
                   <Card key={idx} task={item} />
@@ -78,7 +88,7 @@ const Dashboard = () => {
               </div>
             )}
 
-            {filteredTasks.length === 0 && (
+            {searchedTasks.length === 0 && (
               <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
                 <p>There is no task</p>
               </div>
@@ -200,7 +210,7 @@ const Dashboard = () => {
                               <img
                                 key={idx}
                                 src={PersonImg}
-                                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-2 border-white object-contain`}
+                                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-2 border-white object-cover`}
                               />
                             ))}
                           </div>

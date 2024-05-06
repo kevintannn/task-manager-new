@@ -1,14 +1,13 @@
 /* eslint-disable react/prop-types */
-import CallMissedOutgoingIcon from "@mui/icons-material/CallMissedOutgoing";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { Box, Paper } from "@mui/material";
-import PersonImg from "../assets/asd.jpg";
 import { format } from "date-fns";
 import PrimaryButton from "../components/PrimaryButton";
 import { taskActions } from "../store/taskSlice";
 import { uiActions } from "../store/uiSlice";
-import { people } from "../data";
+import { divisions, users } from "../data";
+import Person from "../components/Person";
 
 const ViewTask = () => {
   const { id } = useParams();
@@ -89,7 +88,7 @@ const ViewTask = () => {
             {task?.updatedBy && (
               <p className="self-end text-gray-600">
                 Last edited by{" "}
-                {people.find((item) => item.id === task.updatedBy).name} at{" "}
+                {users.find((item) => item.id == task.updatedBy)?.name} at{" "}
                 {format(task.updatedAt, "d MMM y (hh:mm:ss aa)")}
               </p>
             )}
@@ -104,7 +103,9 @@ const ViewTask = () => {
 
       {/* right section */}
       <div className="flex flex-col gap-5">
-        <p className="text-sm font-bold">Division: {task.division}</p>
+        <p className="text-sm font-bold">
+          Division: {divisions.find((item) => item.id == task.division)?.name}
+        </p>
 
         <Box
           component={Paper}
@@ -115,7 +116,7 @@ const ViewTask = () => {
           }}
         >
           {task.people.map((item, idx) => (
-            <Person key={idx} id={item} idx={idx} />
+            <Person key={idx} id={item} idx={idx} type={"creator_label"} />
           ))}
         </Box>
 
@@ -135,24 +136,3 @@ const ViewTask = () => {
 };
 
 export default ViewTask;
-
-const Person = ({ id, idx }) => {
-  return (
-    <div className="flex cursor-pointer items-center gap-5 p-1 duration-100 hover:rounded-full hover:bg-blue-100">
-      <img src={PersonImg} className="h-10 w-10 rounded-full object-contain" />
-
-      <div className="flex w-full items-center justify-between">
-        <div className="flex flex-col">
-          <p className="text-sm font-bold">
-            {people.find((item) => item.id == id)?.name}
-          </p>
-          <p className="text-xs text-gray-600">
-            IT Division {idx === 0 && "• Creator"}
-          </p>
-        </div>
-
-        <CallMissedOutgoingIcon className="mr-3 text-blue-700" />
-      </div>
-    </div>
-  );
-};

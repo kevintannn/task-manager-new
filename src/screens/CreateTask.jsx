@@ -1,6 +1,6 @@
 import { Checkbox, ListItemText, MenuItem, Select } from "@mui/material";
 import { useState } from "react";
-import { divisions, people } from "../data";
+import { divisions, users } from "../data";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   validateDate,
@@ -142,6 +142,7 @@ const CreateTask = () => {
               type="text"
               id="title"
               autoComplete="off"
+              placeholder="Eg: Meet with John"
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value);
@@ -187,8 +188,8 @@ const CreateTask = () => {
             >
               <option value="-1">Choose Division</option>
               {divisions.map((item, idx) => (
-                <option key={idx} value={item}>
-                  {item}
+                <option key={idx} value={item.id}>
+                  {item.name}
                 </option>
               ))}
             </select>
@@ -215,12 +216,12 @@ const CreateTask = () => {
               onChange={handlePeopleChange}
               renderValue={(selected) =>
                 selected
-                  .map((item) => people.find((item2) => item2.id === item).name)
+                  .map((item) => users.find((item2) => item2.id === item).name)
                   .join(", ")
               }
               MenuProps={MenuProps}
             >
-              {people
+              {users
                 .filter((item) => item.id !== user.id)
                 .map((item) => (
                   <MenuItem key={item.id} value={item.id}>

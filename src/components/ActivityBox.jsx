@@ -17,7 +17,7 @@ const ActivityBox = ({ activities }) => {
             <div key={idx} className="mt-3 flex items-center gap-5">
               <img
                 src={item.img}
-                className="h-10 w-10 rounded-lg object-contain"
+                className="h-10 w-10 rounded-lg object-cover"
               />
 
               <div className="flex flex-col gap-1 text-gray-500">

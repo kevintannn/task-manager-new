@@ -4,10 +4,9 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
-import PersonImg from "../assets/asd.jpg";
 import { useSelector } from "react-redux";
 
-const TopBar = ({ mode = "default" }) => {
+const TopBar = ({ search, setSearch, mode = "default" }) => {
   const user = useSelector((state) => state.auth.user);
 
   return (
@@ -27,6 +26,8 @@ const TopBar = ({ mode = "default" }) => {
           <input
             className="w-96 rounded-md bg-blue-50 p-2 pl-10 outline-none"
             placeholder="Search for task or project"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       )}
