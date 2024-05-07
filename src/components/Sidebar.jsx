@@ -11,7 +11,7 @@ import PeopleIcon from "@mui/icons-material/People";
 const sidebarLinks = [
   { icon: <DashboardIcon />, link: "/" },
   { icon: <PeopleIcon />, link: "/people" },
-  { icon: <StorageIcon />, link: null },
+  { icon: <StorageIcon />, link: "/tasks" },
   { icon: <PieChartIcon />, link: null },
   { icon: <ChatBubbleIcon />, link: null },
   { icon: <SettingsIcon />, link: "/profile" },

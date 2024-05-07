@@ -210,7 +210,7 @@ const Dashboard = () => {
                               <img
                                 key={idx}
                                 src={PersonImg}
-                                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-2 border-white object-cover`}
+                                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
                               />
                             ))}
                           </div>

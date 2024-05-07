@@ -8,7 +8,7 @@ import {
   validateTaskPeople,
   validateTaskPriority,
   validateTaskTitle,
-} from "../utils";
+} from "../utils/validations";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { taskActions } from "../store/taskSlice";

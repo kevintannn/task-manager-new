@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import MyLogo from "../components/MyLogo";
-import { validatePassword, validateUsername } from "../utils";
+import { validatePassword, validateUsername } from "../utils/validations";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authSlice";
 import { users } from "../data";

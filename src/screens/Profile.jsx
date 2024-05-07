@@ -67,7 +67,7 @@ const Profile = () => {
           <div className="grid grid-cols-2 gap-5 gap-x-10">
             {Object.keys(user).map(
               (item, idx) =>
-                item !== "imgPath" && (
+                !["imgPath", "divisionId"].includes(item) && (
                   <div key={idx} className="flex flex-col">
                     <p className="font-bold">{formatFieldName(item)}</p>
                     <p className="text-sm">{user[item]}</p>

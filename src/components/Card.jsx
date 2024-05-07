@@ -92,7 +92,7 @@ const Card = ({ task }) => {
               <img
                 key={idx}
                 src={users.find((item2) => item2.id == item)?.imgPath}
-                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-2 border-white object-cover`}
+                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
               />
             ))}
           </div>

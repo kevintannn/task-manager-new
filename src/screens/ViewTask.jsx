@@ -9,6 +9,18 @@ import { uiActions } from "../store/uiSlice";
 import { divisions, users } from "../data";
 import Person from "../components/Person";
 
+const getDuration = (startDateTime, endDateTime) => {
+  if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
+    const startTime = format(startDateTime, "hh:mm a");
+    const endTime = format(endDateTime, "hh:mm a");
+    return `${startTime} - ${endTime}`;
+  }
+
+  const formatStartDateTime = format(startDateTime, "eee, d MMM y hh:mm a");
+  const formatEndDateTime = format(endDateTime, "eee, d MMM y hh:mm a");
+  return `${formatStartDateTime} - ${formatEndDateTime}`;
+};
+
 const ViewTask = () => {
   const { id } = useParams();
 
@@ -19,18 +31,6 @@ const ViewTask = () => {
 
   const startDateTime = new Date(task.startDateTime);
   const endDateTime = new Date(task.endDateTime);
-
-  const getDuration = (startDateTime, endDateTime) => {
-    if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
-      const startTime = format(startDateTime, "hh:mm a");
-      const endTime = format(endDateTime, "hh:mm a");
-      return `${startTime} - ${endTime}`;
-    }
-
-    const formatStartDateTime = format(startDateTime, "eee, d MMM y hh:mm a");
-    const formatEndDateTime = format(endDateTime, "eee, d MMM y hh:mm a");
-    return `${formatStartDateTime} - ${formatEndDateTime}`;
-  };
 
   const duration = getDuration(startDateTime, endDateTime);
 
@@ -81,24 +81,26 @@ const ViewTask = () => {
 
           {/* duration and priority */}
           <div className="flex flex-col text-sm">
-            <p>{duration}</p>
-
-            <p>Priority: {task.priority}</p>
-
             {task?.updatedBy && (
-              <p className="self-end text-gray-600">
+              <p className="text-xs text-gray-600">
                 Last edited by{" "}
                 {users.find((item) => item.id == task.updatedBy)?.name} at{" "}
                 {format(task.updatedAt, "d MMM y (hh:mm:ss aa)")}
               </p>
             )}
+
+            <p className="mt-3">{duration}</p>
+
+            <p>Priority: {task.priority}</p>
           </div>
         </div>
 
         {/* lower */}
-        <p className="text-justify leading-6 tracking-wide">
-          {task.description}
-        </p>
+        <div className="rounded-lg bg-blue-50">
+          <p className="p-5 text-justify leading-6 tracking-wide">
+            {task.description}
+          </p>
+        </div>
       </div>
 
       {/* right section */}
