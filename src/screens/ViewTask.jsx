@@ -8,18 +8,7 @@ import { taskActions } from "../store/taskSlice";
 import { uiActions } from "../store/uiSlice";
 import { divisions, users } from "../data";
 import Person from "../components/Person";
-
-const getDuration = (startDateTime, endDateTime) => {
-  if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
-    const startTime = format(startDateTime, "hh:mm a");
-    const endTime = format(endDateTime, "hh:mm a");
-    return `${startTime} - ${endTime}`;
-  }
-
-  const formatStartDateTime = format(startDateTime, "eee, d MMM y hh:mm a");
-  const formatEndDateTime = format(endDateTime, "eee, d MMM y hh:mm a");
-  return `${formatStartDateTime} - ${formatEndDateTime}`;
-};
+import { getDuration } from "../utils";
 
 const ViewTask = () => {
   const { id } = useParams();

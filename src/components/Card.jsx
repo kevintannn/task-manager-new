@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import PersonImg from "../assets/asd.jpg";
 import { Link } from "react-router-dom";
 import { users } from "../data";
+import { getDuration } from "../utils";
 
 const types = {
   high: "shadow-md hover:shadow-lg",
@@ -47,18 +48,6 @@ const iconBackgrounds = {
 const Card = ({ task }) => {
   const startDateTime = new Date(task.startDateTime);
   const endDateTime = new Date(task.endDateTime);
-
-  const getDuration = (startDateTime, endDateTime) => {
-    if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
-      const startTime = format(startDateTime, "hh:mm a");
-      const endTime = format(endDateTime, "hh:mm a");
-      return `${startTime} - ${endTime}`;
-    }
-
-    const formatStartDateTime = format(startDateTime, "eee, d MMM y hh:mm a");
-    const formatEndDateTime = format(endDateTime, "eee, d MMM y hh:mm a");
-    return `${formatStartDateTime} - ${formatEndDateTime}`;
-  };
 
   const duration = getDuration(startDateTime, endDateTime);
 

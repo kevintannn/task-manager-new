@@ -8,10 +8,12 @@ import { getUser } from "./store/authActions";
 import { getTasks } from "./store/taskActions";
 import { Alert, Snackbar } from "@mui/material";
 import { uiActions } from "./store/uiSlice";
+import { getProjects } from "./store/projectActions";
 
 const App = () => {
   const auth = useSelector((state) => state.auth);
   const notification = useSelector((state) => state.ui.notification);
+  const projects = useSelector((state) => state.project.projects);
 
   const dispatch = useDispatch();
 
@@ -20,8 +22,11 @@ const App = () => {
   useEffect(() => {
     dispatch(getUser());
     dispatch(getTasks());
+    dispatch(getProjects());
     setLoading(false);
   }, [dispatch]);
+
+  console.log(projects);
 
   return (
     !loading && (

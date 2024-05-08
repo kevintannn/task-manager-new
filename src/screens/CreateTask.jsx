@@ -129,7 +129,7 @@ const CreateTask = () => {
   };
 
   return (
-    <div className="flex h-full flex-col justify-center gap-5">
+    <div className="mt-5 flex flex-col gap-5">
       <h1 className="text-2xl font-bold">Create New Task</h1>
 
       <div className="flex justify-center gap-5 rounded-xl bg-blue-50/50  p-10">

@@ -49,3 +49,15 @@ export const validateDate = (startDate, endDate) => {
 
   return null;
 };
+
+export const validateProjectName = (projectName) => {
+  return null;
+};
+
+export const validateDeadline = (deadline) => {
+  return null;
+};
+
+export const validateProjectType = (projectType) => {
+  return null;
+};
