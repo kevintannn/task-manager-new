@@ -17,6 +17,7 @@ import ProjectList from "./screens/ProjectList.jsx";
 import CreateProject from "./screens/CreateProject.jsx";
 import ViewProject from "./screens/ViewProject.jsx";
 import EditProject from "./screens/EditProject.jsx";
+import Completion from "./screens/Completion.jsx";
 
 const router = createBrowserRouter([
   {
@@ -65,7 +66,15 @@ const router = createBrowserRouter([
         element: <CreateProject />,
       },
       {
+        path: "/completion",
+        element: <Completion />,
+      },
+      {
         path: "/profile",
+        element: <Profile />,
+      },
+      {
+        path: "/profile/:id",
         element: <Profile />,
       },
     ],

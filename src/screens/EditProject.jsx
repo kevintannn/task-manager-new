@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { projectTypes, users } from "../data";
+import { useEffect, useState } from "react";
+import { projectTypes } from "../data";
 import PrimaryButton from "../components/PrimaryButton";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -42,6 +42,7 @@ const EditProject = () => {
 
   const project = projects.find((item) => item.id == id);
 
+  const [users, setUsers] = useState([]);
   const [projectName, setProjectName] = useState(project.projectName);
   const [deadline, setDeadline] = useState(
     format(project.deadline, "yyyy-MM-dd") +
@@ -138,6 +139,14 @@ const EditProject = () => {
     return navigate(-1);
   };
 
+  useEffect(() => {
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
+
   return (
     <div className="mt-5 flex flex-col gap-5">
       <h1 className="text-2xl font-bold">Edit Project</h1>
@@ -224,7 +233,7 @@ const EditProject = () => {
               onChange={handlePeopleChange}
               renderValue={(selected) =>
                 selected
-                  .map((item) => users.find((item2) => item2.id === item).name)
+                  .map((item) => users.find((item2) => item2.id === item)?.name)
                   .join(", ")
               }
               MenuProps={MenuProps}

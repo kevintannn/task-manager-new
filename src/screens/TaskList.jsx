@@ -3,11 +3,12 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import CircleIcon from "@mui/icons-material/Circle";
 import ListLayout from "./layouts/ListLayout";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { getDuration, stringSort } from "../utils";
-import { divisions, users } from "../data";
 import { Link } from "react-router-dom";
+import { deleteTask } from "../store/taskActions";
+import { useEffect, useState } from "react";
 
 const getUniqueDateGroup = (tasks) => {
   const dateGroup = tasks.flatMap((item) => [
@@ -65,35 +66,42 @@ const TaskList = () => {
         <h1 className="text-4xl font-bold">Task List</h1>
 
         {/* date and tasks */}
-        {tasksByDateGroup.map((item, idx) => (
-          <div key={idx} className="flex flex-col gap-3">
-            {/* date */}
-            <p className="text-lg font-bold">
-              {isToday(Object.keys(item))
-                ? "Today's Tasks"
-                : `${format(new Date(Object.keys(item)), "E, dd MMM yyyy")}`}
-            </p>
-
-            {/* tasks */}
-            {item[Object.keys(item)].map((item2, idx) => (
-              <div
-                key={idx}
-                className="flex cursor-default items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
-              >
-                <CircleIcon
-                  sx={{
-                    fontSize: "15px",
-                    marginLeft: "15px",
-                    marginRight: "15px",
-                    color: "darkslategray",
-                  }}
-                />
-
-                <Task task={item2} />
-              </div>
-            ))}
+        {tasksByDateGroup.length <= 0 ? (
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+            <p>There is no task</p>
           </div>
-        ))}
+        ) : (
+          tasksByDateGroup.map((item, idx) => (
+            <div key={idx} className="flex flex-col gap-3">
+              {/* date */}
+              <p className="text-lg font-bold">
+                {isToday(Object.keys(item))
+                  ? "Today's Tasks"
+                  : `${format(new Date(Object.keys(item)), "E, dd MMM yyyy")}`}
+              </p>
+
+              {/* tasks */}
+              {item[Object.keys(item)].map((item2, idx) => (
+                <Link
+                  key={idx}
+                  to={`/tasks/${item2.id}`}
+                  className="flex cursor-pointer items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
+                >
+                  <CircleIcon
+                    sx={{
+                      fontSize: "15px",
+                      marginLeft: "15px",
+                      marginRight: "15px",
+                      color: "darkslategray",
+                    }}
+                  />
+
+                  <Task task={item2} />
+                </Link>
+              ))}
+            </div>
+          ))
+        )}
       </div>
     </ListLayout>
   );
@@ -102,10 +110,37 @@ const TaskList = () => {
 export default TaskList;
 
 const Task = ({ task }) => {
+  const dispatch = useDispatch();
+
+  const [users, setUsers] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+
   const startDateTime = new Date(task.startDateTime);
   const endDateTime = new Date(task.endDateTime);
 
   const duration = getDuration(startDateTime, endDateTime);
+
+  const handleDeleteTask = () => {
+    if (!confirm("Confirm delete task? (can not be undone)")) {
+      return;
+    }
+
+    dispatch(deleteTask(task.id));
+  };
+
+  useEffect(() => {
+    setDivisions(
+      localStorage.getItem("divisions")
+        ? JSON.parse(localStorage.getItem("divisions"))
+        : [],
+    );
+
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
 
   return (
     <div className="flex w-full items-center">
@@ -152,7 +187,10 @@ const Task = ({ task }) => {
             />
           </Link>
 
-          <div className="cursor-pointer rounded-md bg-red-600 hover:bg-red-700">
+          <div
+            className="cursor-pointer rounded-md bg-red-600 hover:bg-red-700"
+            onClick={handleDeleteTask}
+          >
             <DeleteForeverIcon
               className="p-1 text-white"
               sx={{

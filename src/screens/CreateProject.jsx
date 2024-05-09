@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { projectTypes, users } from "../data";
+import { useEffect, useState } from "react";
+import { projectTypes } from "../data";
 import PrimaryButton from "../components/PrimaryButton";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,6 +36,7 @@ const CreateProject = () => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
 
+  const [users, setUsers] = useState([]);
   const [projectName, setProjectName] = useState("");
   const [deadline, setDeadline] = useState("");
   const [projectType, setProjectType] = useState("-1");
@@ -125,6 +126,14 @@ const CreateProject = () => {
 
     return navigate("/");
   };
+
+  useEffect(() => {
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
 
   return (
     <div className="mt-5 flex flex-col gap-5">

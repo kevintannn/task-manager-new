@@ -1,16 +1,16 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import MyLogo from "../components/MyLogo";
 import { validatePassword, validateUsername } from "../utils/validations";
 import { useDispatch } from "react-redux";
 import { authActions } from "../store/authSlice";
-import { users } from "../data";
 import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
 
 const Auth = () => {
   const dispatch = useDispatch();
 
+  const [users, setUsers] = useState([]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [usernameError, setUsernameError] = useState(null);
@@ -49,6 +49,14 @@ const Auth = () => {
   };
 
   useEnterKeyPressEffect(loginRef);
+
+  useEffect(() => {
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
 
   return (
     <div className="relative flex h-screen w-screen items-center justify-center text-sm">

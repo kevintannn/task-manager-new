@@ -3,11 +3,9 @@ import CallIcon from "@mui/icons-material/Call";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { format } from "date-fns";
-import PersonImg from "../assets/asd.jpg";
 import { Link } from "react-router-dom";
-import { users } from "../data";
 import { getDuration } from "../utils";
+import { useEffect, useState } from "react";
 
 const types = {
   high: "shadow-md hover:shadow-lg",
@@ -46,10 +44,20 @@ const iconBackgrounds = {
 // };
 
 const Card = ({ task }) => {
+  const [users, setUsers] = useState([]);
+
   const startDateTime = new Date(task.startDateTime);
   const endDateTime = new Date(task.endDateTime);
 
   const duration = getDuration(startDateTime, endDateTime);
+
+  useEffect(() => {
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
 
   return (
     <Link
@@ -68,7 +76,7 @@ const Card = ({ task }) => {
       <div className="flex flex-col gap-1">
         {/* completed mark */}
         {task.completed && (
-          <p className="w-fit rounded-full bg-green-600 p-1 px-2 text-xs text-white">
+          <p className="my-1 w-fit rounded-full bg-green-600 p-0.5 px-2 text-xs text-white">
             Done
           </p>
         )}

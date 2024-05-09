@@ -1,6 +1,5 @@
 import { Checkbox, ListItemText, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
-import { divisions, users } from "../data";
+import { useEffect, useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   validateDate,
@@ -28,6 +27,8 @@ const CreateTask = () => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
 
+  const [users, setUsers] = useState([]);
+  const [divisions, setDivisions] = useState([]);
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState("-1");
   const [division, setDivision] = useState("-1");
@@ -127,6 +128,20 @@ const CreateTask = () => {
 
     return navigate("/");
   };
+
+  useEffect(() => {
+    setDivisions(
+      localStorage.getItem("divisions")
+        ? JSON.parse(localStorage.getItem("divisions"))
+        : [],
+    );
+
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
 
   return (
     <div className="mt-5 flex flex-col gap-5">

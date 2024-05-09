@@ -13,6 +13,10 @@ const authSlice = createSlice({
     logout(state) {
       state.user = {};
     },
+
+    changeDivisionId(state, action) {
+      state.user.divisionId = action.payload;
+    },
   },
 });
 

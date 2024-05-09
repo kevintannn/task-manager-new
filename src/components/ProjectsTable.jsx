@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import { projectTypes, users } from "../data";
+import { projectTypes } from "../data";
 import {
   Table,
   TableBody,
@@ -12,13 +12,27 @@ import {
 import IconLabel from "./IconLabel";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const ProjectsTable = ({ projects, fontsize }) => {
+  const [users, setUsers] = useState([]);
+
   const navigate = useNavigate();
 
   const handleRowClick = (projectId) => {
     return navigate(`/projects/${projectId}`);
   };
+
+  useEffect(() => {
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
+
+  console.log(projects);
+  // TODO: continue here, fix error if got
 
   return (
     <TableContainer>
@@ -78,7 +92,7 @@ const ProjectsTable = ({ projects, fontsize }) => {
                 </div>
               </TableCell>
               <TableCell>
-                <IconLabel type={item.status} />
+                <IconLabel type={item.status} fontSizePx={"14px"} />
               </TableCell>
               <TableCell>
                 <MoreHorizIcon fontSize="large" />

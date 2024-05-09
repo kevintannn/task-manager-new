@@ -1,6 +1,5 @@
 import { Checkbox, ListItemText, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
-import { divisions, users } from "../data";
+import { useEffect, useState } from "react";
 import PrimaryButton from "../components/PrimaryButton";
 import {
   validateDate,
@@ -34,6 +33,8 @@ const EditTask = () => {
 
   const task = tasks.find((item) => item.id == id);
 
+  const [users, setUsers] = useState([]);
+  const [divisions, setDivisions] = useState([]);
   const [title, setTitle] = useState(task?.title);
   const [priority, setPriority] = useState(task?.priority);
   const [division, setDivision] = useState(task?.division);
@@ -116,7 +117,7 @@ const EditTask = () => {
               description,
               priority: priority.toLowerCase(),
               division,
-              people: [user.id, ...selectedPeople],
+              people: [task.people[0], ...selectedPeople],
               startDateTime: startDate,
               endDateTime: endDate,
               updatedBy: user.id,
@@ -142,6 +143,20 @@ const EditTask = () => {
 
     return navigate(-1);
   };
+
+  useEffect(() => {
+    setDivisions(
+      localStorage.getItem("divisions")
+        ? JSON.parse(localStorage.getItem("divisions"))
+        : [],
+    );
+
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
 
   return (
     <div className="flex h-full flex-col justify-center gap-5">
@@ -230,13 +245,13 @@ const EditTask = () => {
               onChange={handlePeopleChange}
               renderValue={(selected) =>
                 selected
-                  .map((item) => users.find((item2) => item2.id === item).name)
+                  .map((item) => users.find((item2) => item2.id === item)?.name)
                   .join(", ")
               }
               MenuProps={MenuProps}
             >
               {users
-                .filter((item) => item.id !== user.id)
+                .filter((item) => item.id != task.people[0])
                 .map((item) => (
                   <MenuItem key={item.id} value={item.id}>
                     <Checkbox checked={selectedPeople.indexOf(item.id) > -1} />
@@ -275,7 +290,6 @@ const EditTask = () => {
                 id="startDate"
                 value={startDate}
                 onChange={(e) => {
-                  console.log(e.target.value);
                   setStartDate(e.target.value);
                   setDateError(validateDate(e.target.value, endDate));
                 }}

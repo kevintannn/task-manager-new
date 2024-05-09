@@ -9,11 +9,11 @@ import { getTasks } from "./store/taskActions";
 import { Alert, Snackbar } from "@mui/material";
 import { uiActions } from "./store/uiSlice";
 import { getProjects } from "./store/projectActions";
+import { divisions, projects, tasks, users } from "./data";
 
 const App = () => {
   const auth = useSelector((state) => state.auth);
   const notification = useSelector((state) => state.ui.notification);
-  const projects = useSelector((state) => state.project.projects);
 
   const dispatch = useDispatch();
 
@@ -26,7 +26,28 @@ const App = () => {
     setLoading(false);
   }, [dispatch]);
 
-  console.log(projects);
+  useEffect(() => {
+    const existingDivisionsJSON = localStorage.getItem("divisions");
+    const existingUsersJSON = localStorage.getItem("users");
+    const existingTasksJSON = localStorage.getItem("tasks");
+    const existingProjectsJSON = localStorage.getItem("projects");
+
+    if (!existingDivisionsJSON) {
+      localStorage.setItem("divisions", JSON.stringify(divisions));
+    }
+
+    if (!existingUsersJSON) {
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+
+    if (!existingTasksJSON) {
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    if (!existingProjectsJSON) {
+      localStorage.setItem("projects", JSON.stringify(projects));
+    }
+  }, []);
 
   return (
     !loading && (
@@ -65,6 +86,11 @@ const Notification = ({ notification }) => {
   return (
     <Snackbar
       autoHideDuration={10000}
+      onClose={(e, reason) => {
+        if (reason === "timeout") {
+          dispatch(uiActions.closeNotification());
+        }
+      }}
       anchorOrigin={{ vertical: "top", horizontal: "right" }}
       open={notification.open}
     >
