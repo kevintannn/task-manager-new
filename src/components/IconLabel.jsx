@@ -46,14 +46,16 @@ const IconLabel = ({
     <div
       className={`${cname} ${iconTypes[type]?.color ?? "text-gray-600"} ${hoverable ? "cursor-pointer text-gray-500 hover:text-gray-700" : "cursor-default text-gray-600"} flex items-center gap-2`}
     >
-      <div className="-mt-0.5">{iconTypes[type].Icon}</div>
+      <div className="-mt-0.5">
+        {iconTypes[type]?.Icon ?? iconTypes["ongoing"].Icon}
+      </div>
 
       <p
         style={{
           fontSize: fontSizePx ?? "15px",
         }}
       >
-        {iconTypes[type].text}
+        {iconTypes[type]?.text ?? iconTypes["ongoing"].text}
       </p>
     </div>
   );

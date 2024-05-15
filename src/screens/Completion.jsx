@@ -5,10 +5,14 @@ import { useSelector } from "react-redux";
 
 const Completion = () => {
   const tasks = useSelector((state) => state.task.tasks);
+  const projects = useSelector((state) => state.project.projects);
 
   const [users, setUsers] = useState([]);
 
   const countCompletedTasks = tasks.filter((item) => item.completed).length;
+  const countCompletedProjects = projects.filter(
+    (item) => item.status === "completed",
+  ).length;
 
   useEffect(() => {
     setUsers(
@@ -69,12 +73,17 @@ const Completion = () => {
           <p className="font-semibold">Project Completion</p>
 
           <div className="text-center">
-            <p>20 / 100</p>
+            {countCompletedProjects} / {projects.length}
             <p className="text-sm text-gray-500">Completed</p>
           </div>
 
           <div className="relative flex h-7 w-60 items-center rounded-lg bg-gray-300">
-            <div className="absolute h-7 w-[calc((23/117)*100%)] rounded-lg bg-blue-900"></div>
+            <div
+              className="absolute h-7 rounded-lg bg-blue-900"
+              style={{
+                width: `calc((${countCompletedProjects}/${projects.length})*100%)`,
+              }}
+            ></div>
           </div>
         </Box>
       </div>
@@ -94,6 +103,20 @@ const Completion = () => {
 
           const completedTasksOfUser = tasksOfUser.filter(
             (item) => item.completed,
+          ).length;
+
+          const projectsOfUser = projects.filter((item2) => {
+            const existUserInPeople = item2.people.find(
+              (item3) => item3 == item.id,
+            );
+
+            if (existUserInPeople) {
+              return item2;
+            }
+          });
+
+          const completedProjectsOfUser = projectsOfUser.filter(
+            (item) => item.status === "completed",
           ).length;
 
           return (
@@ -125,11 +148,17 @@ const Completion = () => {
                 {/* project completion */}
                 <div className="flex flex-col items-center gap-1">
                   <div className="relative flex h-5 w-48 items-center rounded-md bg-gray-300">
-                    <div className="absolute h-5 w-[calc((23/117)*100%)] rounded-md bg-orange-600"></div>
+                    <div
+                      className="absolute h-5 rounded-md bg-orange-600"
+                      style={{
+                        width: `calc((${completedProjectsOfUser}/${projectsOfUser.length})*100%)`,
+                      }}
+                    ></div>
                   </div>
 
                   <p className="text-xs text-gray-500">
-                    Completed 5 / 19 Projects
+                    Completed {completedProjectsOfUser} /{" "}
+                    {projectsOfUser.length} Projects
                   </p>
                 </div>
               </div>
