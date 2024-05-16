@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { useSelector } from "react-redux";
 
 export const getDuration = (startDateTime, endDateTime) => {
   if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
@@ -20,4 +21,24 @@ export const stringSort = (array, order) => {
   if (order === "desc") {
     return array.sort((a, b) => b.localeCompare(a));
   }
+};
+
+export const createActivity = (person, activity) => {
+  const existingActivitiesJSON = localStorage.getItem("activities");
+  const existingActivities = existingActivitiesJSON
+    ? JSON.parse(existingActivitiesJSON)
+    : [];
+
+  const newId = existingActivities?.[existingActivities.length - 1]?.id
+    ? parseInt(existingActivities?.[existingActivities.length - 1]?.id) + 1
+    : 1;
+
+  existingActivities.push({
+    id: newId,
+    person,
+    activity,
+    updatedAt: new Date(),
+  });
+
+  localStorage.setItem("activities", JSON.stringify(existingActivities));
 };

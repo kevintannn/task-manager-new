@@ -379,12 +379,12 @@ const EditProfile = () => {
               }}
             >
               <FormControlLabel
-                value="Male"
+                value="male"
                 control={<Radio size="small" />}
                 label="Male"
               />
               <FormControlLabel
-                value="Female"
+                value="female"
                 control={<Radio size="small" />}
                 label="Female"
               />

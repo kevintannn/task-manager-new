@@ -1,6 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, json, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import MyLogo from "../components/MyLogo";
 import {
@@ -13,9 +13,7 @@ import {
   validateUsername,
 } from "../utils/validations";
 import { useDispatch, useSelector } from "react-redux";
-import { authActions } from "../store/authSlice";
 import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
-import { getUser } from "../store/authActions";
 import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import { uiActions } from "../store/uiSlice";
 
@@ -299,12 +297,12 @@ const Register = () => {
               }}
             >
               <FormControlLabel
-                value="Male"
+                value="male"
                 control={<Radio size="small" />}
                 label="Male"
               />
               <FormControlLabel
-                value="Female"
+                value="female"
                 control={<Radio size="small" />}
                 label="Female"
               />

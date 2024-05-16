@@ -5,7 +5,7 @@ export const users = [
     id: 1,
     name: "Kevin Tan",
     email: "kvnt20@gmail.com",
-    gender: "Male",
+    gender: "male",
     contactNumber: "+62 813 6257 4332",
     imgPath:
       "https://static.promediateknologi.id/crop/0x0:0x0/0x0/webp/photo/p2/131/2024/02/04/one-piece-zoro-1278854-1280x0-1-673314859.jpg",
@@ -17,7 +17,7 @@ export const users = [
     id: 2,
     name: "Sawyer Pooley",
     email: "spooley0@google.com.br",
-    gender: "Male",
+    gender: "male",
     contactNumber: "+506 805 577 0660",
     imgPath:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAALGSURBVDjLpZNdSNNRGMZ330V2GXXVRXVTICRd2IVIIFGSoJDWRUssRREJiswP1La16aab3x8tyoWl+T11tqmYmJbZh61pfvWFKZmoqZmp236dv1MxKrrowMP5n/95n+d5z3veIwNk/4PND1dz8z5nY2P0al1d0nJVVdhSebnXxt5cYeGO2ezsmGmtduyLUtnxOTn5+C8CLosl1tnQMONsseJsa2WlvpbF0lLHgtHoPVdQsHfWYLB/M91mtbuTH1YL0+lqxuLi7nyIitomkQOd5jrcQwMwMgQDDhgdZqW9jbn8/I8zen3/ktjHYYdHD0GISDEz+kzeyuVK2arZbHU/fwovn0FTI5jNUFMj1r24ertxdgpSbw/cugU3b0JREZSZcD59zHBo6Lhsubr6k3tkEKzNUCecagW5shLu3vUIPmgCo1GgBAoKBPIg24DrSRdvgoIWZKJYX9yD/VAvyBUVUH4PTCaPY8k6KU+QcnIEUQ8ZGaBR4+psp//YsTnZosk06nK8gmrhWnrbk+YGMTcXDAbQ6SA9HVQquJYG1xW4ujqw+/svyBZu3Cherr4PPV2e9La6abXCUQNKJaSmQnISXL4kjljGpEpBn69vsexrXt6emays90uSiFClpNDjJEFxTRBT1ohWVSSXc09zIesk51RH0YYd+v7Cx2fXWh9MqdUHJ1NTe+ezM3FJV1UjCphwFRITIP4KDSlnSas8R6Mjn74JG/qWaE7pD3A4ZqdusxMn4uO3j128qPgYHT0/byyGZnGdyUIkLpZwTQD1rw3UD4ijiaFrPY++NVISWPqtt9+Fhx8aOXPm8VSSILfboNXCiURvLA4jW4fZni8J/PmBDIWEeA0EBuY6AgLc4xFyjsTsdmpt4aht8jWy2ir/ewZbYffzCxaVjhOBymDdfjJtEWvO0iytf6nBvyCCNQLzUtrrs0b6/xNhTevE6BlD4wAAAABJRU5ErkJggg==",
@@ -29,7 +29,7 @@ export const users = [
     id: 3,
     name: "Karissa Gresley",
     email: "kgresley1@oakley.com",
-    gender: "Female",
+    gender: "female",
     contactNumber: "+598 748 758 8627",
     imgPath:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAJRSURBVBgZpcHda81xHMDx9+d3fudYzuYw2RaZ5yTWolEiuZpCSjGJFEktUUr8A6ZxQZGHmDtqdrGUXHgoeZqSp1F2bLFWjtkOB8PZzvmd7+djv5XaBRfL6yVmxv+QjQeu7l25uuZYJmtxM0AVU8Wpw9RQU8w51AxzDqfKhFjwq6Mjdbj1RN0Zv2ZFzaloUdwrL2Is4r+y7hRwxs8G5mUzPxmrwcA8hvnmjIZtcxmr3Y09hHwzJZQvOAwwNZyCYqgaThVXMFzBCD7fJfv8MpHiKvaV3ePV2f07fMwIiSeIGeYJJoao4HmCiIeIQzPXifY+paJqO4lZi/nWPZ/krabjvlNHyANMBAQiBiqgakQMCunbxHJviM9bQeZdBzHJUzKhguLJlQnf1BghAmZ4gImAgAjk++8jP56QmL2GXG8zsfFCz8skA1mQXKbaU3X8ISIgQsgDcun7FL7cJjFnLUMfLyLRr0SLS4hbhiup5Szd19rpFYKAESKICCERoS95neyHmyTmbmAodQ4vGpAfmEn6YTtTahv4ODiRkGdOCUUAAUSE/uQNfqTaKFu4jvynJiIxIzcwg/SjF1RsOk9R+QJMlZCvqvwhQFdbM4XvrynIVHpfn2ZSWYyhzHS+PUtSueUC0cQ0QmpGyE9197TUnwzq1DnUKbXSxOb6S7xtPkjngzbGVVbzvS/FjaGt9DU8xlRRJdTCMDEzRjuyZ1FwaFe9j+d4eecaPd1dPxNTSlfWHm1v5y/EzBitblXp4JLZ5f6yBbOwaK5tsD+9c33jq/f8w2+mRSjOllPhkAAAAABJRU5ErkJggg==",
@@ -41,7 +41,7 @@ export const users = [
     id: 4,
     name: "Tanner Swatridge",
     email: "tswatridge2@japanpost.jp",
-    gender: "Male",
+    gender: "male",
     contactNumber: "+94 234 264 7100",
     imgPath:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAALnSURBVDjLfZNLaFx1HIW/e2fuzJ00w0ymkpQpiUKfMT7SblzU4kayELEptRChUEFEqKALUaRUV2YhlCLYjYq4FBeuiqZgC6FIQzBpEGpDkzHNs5PMTJtmHnfu6//7uSh2IYNnffg23zmWqtIpd395YwiRL1Q0qyIfD56cmOvUs/4LWJg40auiH6jI+7v3ncybdo2Hy9ebKvqNGrn03Nj1+x0Bi1dHHVV9W0U+ye4d2d83+Ca2GJrlGZx0gkppkkfrsysqclFFvh8++3v7CWDh6ugIohfSPcPH+w6fwu05ABoSby9yb3Kc/mePYXc9TdCqslWapVGdn1Zjxo++O33Fujtx4gdEzj61f8xyC8/jN2rsVOcxYZOoVSZtBewZOAT+NonuAWw3S728wFZpFm975cekGjlz8NXLVtSo0SxPImGdtFfFq5epr21wdOxrnMwuaC2jrRJWfYHdxRfIFeDWr0unkyrSUqxcyk2TLQzQrt6hqydPvidDBg/8VTAp8DegvYa3OU1z+SbuM6dQI62kioAAVgondwAnncWvzCDNCk4CLO9vsJVw8xqN+iPiTB5SaTSKURGSaoTHHgxoAMlduL1HiFMZXP8BsvkbO1GD2O3GpLOIF0KsSBijxmCrMY+FqgGJQDzQgGT3XrJ7DuI5EKZd4iDG+CHG84m8AIki1Ai2imRsx4FEBtQHCUB8MG1wi8QKGhjEC4mbAVHTx8kNYSuoiGurkRtLN76ivb0K6SIkusCEoBEgaCQYPyT2QhKpAXKHTiMmQ2lmChWZTrw32v9TsLOyVlu8Nhi2G4Vs32HsTC9IA2KPRuU2Erp097+O5RRYvz3H1r3JldivfY7IR0+mfOu7l3pV5EM1cq744mi+OPwaRD71tSk0Vsp3/uLB6s2minyrIpeOf7a00fFMf1w+MqRGzqvIW/teecdqV5a5P/8ncXv9ZxUdf/lCae5/3/hvpi4OjajIp4ikVOTLY+cXr3Tq/QPcssKNXib9yAAAAABJRU5ErkJggg==",
@@ -53,7 +53,7 @@ export const users = [
     id: 5,
     name: "Lori Bagley",
     email: "lbagley3@imageshack.us",
-    gender: "Female",
+    gender: "female",
     contactNumber: "+7 870 981 1748",
     imgPath:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIESURBVDjLlVJtaxpBEH7uvNSL50skFBqCiDVYpCWiIAjtx4Ih4I/zs78jkD9QioVAUBGNWigqRfpBxSO+3LnbmY13mNQWOvAwuzszz7zsQEoJBomWzWY/V6vVb5lM5oruBr/tYBQKhU+1Wu0r+/CbF6cOA02Tv9jr5gbn+TyGd3cQlQpe40nYFry9xZvLS/y8v8fm+lrZ0lJqukbCTlYwCCsWw3a7RTgex3EggLiuK5jkYkYiynYcjcLcEXOsvjvDNAx0BgPl1O31IIjEPjmBHQ5ja5rodLvK1nl48Ang9dgHRIyyN87O0LNtXFD2FLWmU4B0HKxdF99JDwhvhUCB9CPZLwDd2K/gw+kp3lsW5GYDl5wEg8heEdG7oyNkSGuE4GKBRyL1q6jX69J13b/CcRy5XC4VWPiNYzjWwAFZr9dot9tIp9Po9/uq9/l8jnK57H25L/ohAg4ejUaI0ORzuRxSqRRCoRAosw+P6BmB95inXfAWhdFqtVQ1Dg+UqqNW/Jg/WnhZ4mw2g6DJc/BkMlFnhud3cAb7ZNwOrbaaQzKZ5OXBcDiEQb/GA9XljoqU2A+u0CqzqVgswqKv5awcPB6PfSJ/Bgv6V5uEjoIN+wjQHrDmCjhzIpHAarVSLfktdGlNyTHKZf1LvAqYrNlsolQqPRFMp9MvjUbjI/5D6Dd+sP4NLTpNB1cxufkAAAAASUVORK5CYII=",
@@ -65,7 +65,7 @@ export const users = [
     id: 6,
     name: "Ranice Larkings",
     email: "rlarkings4@shop-pro.jp",
-    gender: "Female",
+    gender: "female",
     contactNumber: "+86 266 655 2113",
     imgPath:
       "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAFhSURBVDjLpZMxbtZAEIW/N/bP7w4aSiQuQEODEFdIAVI6KFJwgeQenAEBFQVU1CBOkAsgroDSRMof77wUa68tK5GQstqVd1fz3rw345Vt7jN6gM8/zj9k6u3lIYer8ZaoTY5dD8OOj+9fPz/tAdJ6d/TqyeNhGCR1eMIkAMIGez6bMl7z/eefE6ASXF7lfr8f9OX3P0oxY2b9lmQspkznkibTnB0/paQEEACHESI6hKhTTa7mrepegsxNDWhyadAaLIQJCQssiAA3kxuCBpKRRMhkCBlCVW8a1p1rBPYCXjKKTrNRkOvCuougkkTULA4tHRQ4IVb1aQSeCJbMJlZgTdlTqsRwt4LqddUFJms2YWPfpsBugRFTRWffEkojs4CnH6sRaLoNQbImEWlXZV7L3xRx2OmCvH745sUj0Ozd89wMMY4H+k5uBA96ff326+/LQ/Gz/3mcfQe74FNt7T2f8w1Fi68/h3owMgAAAABJRU5ErkJggg==",
@@ -683,59 +683,59 @@ export const projects = [
   },
 ];
 
-export const activities = [
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date(2024, 3, 27, 15, 10),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-  {
-    img: PersonImg,
-    name: "John Paul",
-    activity: "updated the content for INSU project.",
-    datetime: new Date("2024-02-04"),
-  },
-];
+// export const activities = [
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date(2024, 3, 27, 15, 10),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+//   {
+//     img: PersonImg,
+//     name: "John Paul",
+//     activity: "updated the content for INSU project.",
+//     datetime: new Date("2024-02-04"),
+//   },
+// ];

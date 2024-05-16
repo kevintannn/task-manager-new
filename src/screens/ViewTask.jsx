@@ -7,7 +7,7 @@ import PrimaryButton from "../components/PrimaryButton";
 import { taskActions } from "../store/taskSlice";
 import { uiActions } from "../store/uiSlice";
 import Person from "../components/Person";
-import { getDuration } from "../utils";
+import { createActivity, getDuration } from "../utils";
 import { useEffect, useState } from "react";
 import { deleteTask } from "../store/taskActions";
 
@@ -47,6 +47,8 @@ const ViewTask = () => {
         open: true,
       }),
     );
+
+    createActivity(user.id, `marked "${task.title}" task as done.`);
   };
 
   const handleDeleteTask = () => {
@@ -55,6 +57,7 @@ const ViewTask = () => {
     }
 
     if (dispatch(deleteTask(id))) {
+      createActivity(user.id, `deleted "${task.title}" task.`);
       return navigate("/");
     }
   };

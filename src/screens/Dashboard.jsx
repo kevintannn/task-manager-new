@@ -8,8 +8,7 @@ import Card from "../components/Card";
 import TopBar from "../components/TopBar";
 import Calendar from "react-calendar";
 import ActivityBox from "../components/ActivityBox";
-import { activities } from "../data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import PrimaryButton from "../components/PrimaryButton";
 import { useSelector } from "react-redux";
@@ -21,6 +20,7 @@ const Dashboard = () => {
   const tasks = useSelector((state) => state.task.tasks);
   const projects = useSelector((state) => state.project.projects);
 
+  const [activities, setActivities] = useState([]);
   const [selectedDate, setSelectedDate] = useState(
     new Date(new Date().toDateString()),
   );
@@ -46,6 +46,16 @@ const Dashboard = () => {
   const paginatedTasks = searchedTasks.slice(startIdx, startIdx + pageSize);
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
+
+  useEffect(() => {
+    setActivities(
+      localStorage.getItem("activities")
+        ? JSON.parse(localStorage.getItem("activities")).sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+          )
+        : [],
+    );
+  }, []);
 
   return (
     <div className="flex flex-col">

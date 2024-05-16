@@ -1,13 +1,27 @@
 /* eslint-disable react/prop-types */
 import { formatDistanceToNow } from "date-fns";
+import { useEffect, useState } from "react";
+import { avatarImg } from "../constants";
 
 const ActivityBox = ({ activities }) => {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
+
   return (
     <div className="flex flex-col rounded-lg bg-blue-50/50 p-5 text-xs">
       {/* header */}
       <div className="flex items-center justify-between border-b-2 border-b-gray-200 pb-3">
         <h1 className="text-lg font-bold">Activity</h1>
-        <p className="text-sm text-blue-800">See All</p>
+        <p className="cursor-pointer text-sm text-blue-800 hover:text-blue-400">
+          See All
+        </p>
       </div>
 
       {/* content */}
@@ -16,20 +30,27 @@ const ActivityBox = ({ activities }) => {
           idx < 6 && (
             <div key={idx} className="mt-3 flex items-center gap-5">
               <img
-                src={item.img}
-                className="h-10 w-10 rounded-lg object-cover"
+                src={
+                  users.find((item2) => item2.id == item.person)?.imgPath ??
+                  avatarImg
+                }
+                className="h-10 w-10 self-start rounded-lg object-cover"
               />
 
               <div className="flex flex-col gap-1 text-gray-500">
                 <p>
                   <span className="font-bold text-black">
-                    {item.name.split(" ")[0]}
+                    {
+                      users
+                        .find((item2) => item2.id == item.person)
+                        ?.name.split(" ")[0]
+                    }
                   </span>{" "}
                   {item.activity}
                 </p>
 
                 <p className="text-[10px]">
-                  {formatDistanceToNow(item.datetime) + " ago"}
+                  {formatDistanceToNow(item.updatedAt) + " ago"}
                 </p>
               </div>
             </div>

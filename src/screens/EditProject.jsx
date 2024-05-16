@@ -22,6 +22,7 @@ import {
   Select,
 } from "@mui/material";
 import { format } from "date-fns";
+import { createActivity } from "../utils";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -102,31 +103,37 @@ const EditProject = () => {
     }
 
     // update database
-
     const existingProjectsJSON = localStorage.getItem("projects");
     const existingProjects = existingProjectsJSON
-      ? JSON.parse(existingProjectsJSON).map((item) => {
-          if (item.id == id) {
-            return {
-              ...item,
-              projectName,
-              deadline,
-              projectType,
-              people: [user.id, ...selectedPeople],
-              description,
-              status,
-              updatedBy: user.id,
-              updatedAt: new Date(),
-            };
-          }
-
-          return item;
-        })
+      ? JSON.parse(existingProjectsJSON)
       : [];
+      
+    const existingProject = existingProjects.find(
+      (item) => item.id == project.id,
+    );
+    const existingProjectUpdated = {
+      ...existingProject,
+      projectName,
+      deadline,
+      projectType,
+      people: [project.people[0], ...selectedPeople],
+      description,
+      status,
+      updatedBy: user.id,
+      updatedAt: new Date(),
+    };
 
-    localStorage.setItem("projects", JSON.stringify(existingProjects));
+    const existingProjectsUpdated = existingProjects.map((item) => {
+      if (item.id == project.id) {
+        return { ...item, ...existingProjectUpdated };
+      }
 
-    dispatch(projectActions.replaceProjects(existingProjects));
+      return item;
+    });
+
+    localStorage.setItem("projects", JSON.stringify(existingProjectsUpdated));
+
+    dispatch(projectActions.replaceProjects(existingProjectsUpdated));
 
     dispatch(
       uiActions.setNotification({
@@ -135,6 +142,27 @@ const EditProject = () => {
         open: true,
       }),
     );
+
+    createActivity(
+      user.id,
+      `updated the details of "${existingProjectUpdated.projectName}" project.`,
+    );
+
+    // check if title is updated
+    if (existingProject.projectName !== existingProjectUpdated.projectName) {
+      createActivity(
+        user.id,
+        `changed project name of "${existingProject.projectName}" to "${existingProjectUpdated.projectName}".`,
+      );
+    }
+
+    // check if status is updated
+    if (existingProject.status !== existingProjectUpdated.status) {
+      createActivity(
+        user.id,
+        `changed project status of "${existingProjectUpdated.projectName}" from "${existingProject.status}" to "${existingProjectUpdated.status}".`,
+      );
+    }
 
     return navigate(-1);
   };

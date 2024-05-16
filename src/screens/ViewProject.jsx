@@ -10,10 +10,12 @@ import IconLabel from "../components/IconLabel";
 import { useEffect, useState } from "react";
 import { uiActions } from "../store/uiSlice";
 import { deleteProject } from "../store/projectActions";
+import { createActivity } from "../utils";
 
 const ViewProject = () => {
   const { id } = useParams();
 
+  const user = useSelector((state) => state.auth.user);
   const projects = useSelector((state) => state.project.projects);
   const project = projects.find((item) => item.id == id);
   const dispatch = useDispatch();
@@ -28,8 +30,11 @@ const ViewProject = () => {
     }
 
     if (dispatch(deleteProject(id))) {
+      createActivity(user.id, `deleted "${project.projectName}" project.`);
       return navigate("/");
     }
+
+    // TODO: last is here, continue to incorporate activity
   };
 
   useEffect(() => {

@@ -187,7 +187,11 @@ const Profile = () => {
                     !["imgPath", "divisionId"].includes(item) && (
                       <div key={idx} className="flex flex-col">
                         <p className="font-bold">{formatFieldName(item)}</p>
-                        <p className="text-sm">{user[item]}</p>
+                        <p className="text-sm">
+                          {item === "gender"
+                            ? user[item][0].toUpperCase() + user[item].slice(1)
+                            : user[item]}
+                        </p>
                       </div>
                     ),
                 )
@@ -201,7 +205,11 @@ const Profile = () => {
                     ].includes(item) && (
                       <div key={idx} className="flex flex-col">
                         <p className="font-bold">{formatFieldName(item)}</p>
-                        <p className="text-sm">{user[item]}</p>
+                        <p className="text-sm">
+                          {item === "gender"
+                            ? user[item][0].toUpperCase() + user[item].slice(1)
+                            : user[item]}
+                        </p>
                       </div>
                     ),
                 )}

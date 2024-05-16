@@ -12,6 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { taskActions } from "../store/taskSlice";
 import { uiActions } from "../store/uiSlice";
+import { createActivity } from "../utils";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -125,6 +126,8 @@ const CreateTask = () => {
         open: true,
       }),
     );
+
+    createActivity(user.id, `created "${title}" task.`);
 
     return navigate("/");
   };

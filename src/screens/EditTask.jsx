@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../store/uiSlice";
 import { format } from "date-fns";
 import { taskActions } from "../store/taskSlice";
+import { createActivity } from "../utils";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -109,29 +110,33 @@ const EditTask = () => {
     // update database
     const existingTasksJSON = localStorage.getItem("tasks");
     const existingTasks = existingTasksJSON
-      ? JSON.parse(existingTasksJSON).map((item) => {
-          if (item.id == id) {
-            return {
-              ...item,
-              title,
-              description,
-              priority: priority.toLowerCase(),
-              division,
-              people: [task.people[0], ...selectedPeople],
-              startDateTime: startDate,
-              endDateTime: endDate,
-              updatedBy: user.id,
-              updatedAt: new Date(),
-            };
-          }
-
-          return item;
-        })
+      ? JSON.parse(existingTasksJSON)
       : [];
 
-    localStorage.setItem("tasks", JSON.stringify(existingTasks));
+    const existingTask = existingTasks.find((item) => item.id == task.id);
+    const existingTaskUpdated = {
+      ...existingTask,
+      title,
+      description,
+      priority: priority.toLowerCase(),
+      division,
+      people: [task.people[0], ...selectedPeople],
+      startDateTime: startDate,
+      endDateTime: endDate,
+      updatedBy: user.id,
+      updatedAt: new Date(),
+    };
 
-    dispatch(taskActions.replaceTasks(existingTasks));
+    const existingTasksUpdated = existingTasks.map((item) => {
+      if (item.id == task.id) {
+        return { ...item, ...existingTaskUpdated };
+      }
+
+      return item;
+    });
+
+    localStorage.setItem("tasks", JSON.stringify(existingTasksUpdated));
+    dispatch(taskActions.replaceTasks(existingTasksUpdated));
 
     dispatch(
       uiActions.setNotification({
@@ -140,6 +145,19 @@ const EditTask = () => {
         open: true,
       }),
     );
+
+    createActivity(
+      user.id,
+      `updated the details of "${existingTaskUpdated.title}" task.`,
+    );
+
+    // check if title is updated
+    if (existingTask.title !== existingTaskUpdated.title) {
+      createActivity(
+        user.id,
+        `updated task title from "${existingTask.title}" to "${existingTaskUpdated.title}".`,
+      );
+    }
 
     return navigate(-1);
   };
