@@ -7,6 +7,7 @@ import { getDuration } from "../utils";
 import { deleteTask } from "../store/taskActions";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { avatarImg } from "../constants";
 
 export const Task = ({ task, type = "action" }) => {
   const dispatch = useDispatch();
@@ -63,7 +64,7 @@ export const Task = ({ task, type = "action" }) => {
           {task.people.map((item, idx) => (
             <img
               key={idx}
-              src={users.find((item2) => item2.id == item)?.imgPath}
+              src={users.find((item2) => item2.id == item)?.imgPath ?? avatarImg}
               className={`${idx !== 0 ? "-ml-4" : ""} h-10 w-10 rounded-full border-[3px] border-white object-cover`}
             />
           ))}

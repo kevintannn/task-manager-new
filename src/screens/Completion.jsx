@@ -91,29 +91,17 @@ const Completion = () => {
       {/* progresses of people */}
       <div className="flex flex-col gap-5">
         {users.map((item, idx) => {
-          const tasksOfUser = tasks.filter((item2) => {
-            const existUserInPeople = item2.people.find(
-              (item3) => item3 == item.id,
-            );
-
-            if (existUserInPeople) {
-              return item2;
-            }
-          });
+          const tasksOfUser = tasks.filter((item2) =>
+            item2.people.includes(item.id),
+          );
 
           const completedTasksOfUser = tasksOfUser.filter(
             (item) => item.completed,
           ).length;
 
-          const projectsOfUser = projects.filter((item2) => {
-            const existUserInPeople = item2.people.find(
-              (item3) => item3 == item.id,
-            );
-
-            if (existUserInPeople) {
-              return item2;
-            }
-          });
+          const projectsOfUser = projects.filter((item2) =>
+            item2.people.includes(item.id),
+          );
 
           const completedProjectsOfUser = projectsOfUser.filter(
             (item) => item.status === "completed",

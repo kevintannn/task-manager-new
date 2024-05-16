@@ -3,6 +3,7 @@ import CallMissedOutgoingIcon from "@mui/icons-material/CallMissedOutgoing";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { avatarImg } from "../constants";
 
 const Person = ({ id, type, idx }) => {
   const user = useSelector((state) => state.auth.user);
@@ -44,7 +45,7 @@ const Person = ({ id, type, idx }) => {
       onClick={handleClick}
     >
       <img
-        src={person?.imgPath}
+        src={person?.imgPath ?? avatarImg}
         className="h-10 w-10 rounded-full object-cover"
       />
 

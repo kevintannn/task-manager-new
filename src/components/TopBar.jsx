@@ -56,7 +56,7 @@ const TopBar = ({ search, setSearch, mode = "default" }) => {
           </div>
 
           <div className="mr-5 duration-150 group-hover:ml-3 group-hover:mr-7">
-            <p>Kevin Tan</p>
+            <p>{user.name}</p>
             <p className="text-xs text-gray-500">Admin</p>
           </div>
 

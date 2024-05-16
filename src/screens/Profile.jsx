@@ -10,6 +10,7 @@ import { Task } from "../components/Task";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import ProjectsTable from "../components/ProjectsTable";
+import { avatarImg } from "../constants";
 
 const formatFieldName = (fieldName) => {
   if (fieldName === "id") {
@@ -49,22 +50,32 @@ const Profile = () => {
 
   const navigate = useNavigate();
 
+  const completedUserTasks = userTasks?.filter((item) => item.completed);
+  const completedUserProjects = userProjects?.filter(
+    (item) => item.status === "completed",
+  );
+
   const pageSize = 5;
-  const totalPages = Math.ceil(userTasks?.length / pageSize);
+  const totalPages = Math.ceil(completedUserTasks?.length / pageSize);
   const startIdx = (currentPage - 1) * pageSize;
-  const paginatedTasks = userTasks?.slice(startIdx, startIdx + pageSize);
+  const paginatedTasks = completedUserTasks?.slice(
+    startIdx,
+    startIdx + pageSize,
+  );
 
   const projectPageSize = 5;
-  const projectTotalPages = Math.ceil(userProjects?.length / projectPageSize);
+  const projectTotalPages = Math.ceil(
+    completedUserProjects?.length / projectPageSize,
+  );
   const projectStartIdx = (projectCurrentPage - 1) * projectPageSize;
-  const paginatedProjects = userProjects?.slice(
+  const paginatedProjects = completedUserProjects?.slice(
     projectStartIdx,
     projectStartIdx + projectPageSize,
   );
 
   const logout = () => {
-    dispatch(authActions.logout());
     try {
+      dispatch(authActions.logout());
       localStorage.removeItem("user");
 
       dispatch(
@@ -101,12 +112,10 @@ const Profile = () => {
 
     // if user is myself
     if (!id) {
-      const existingUser = localStorage.getItem("user")
-        ? JSON.parse(localStorage.getItem("user"))
-        : null;
-
-      existingUser.divisionId = divisionId;
-      localStorage.setItem("user", JSON.stringify(existingUser));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(existingUsers.find((item) => item.id == user.id)),
+      );
 
       dispatch(authActions.changeDivisionId(divisionId));
     }
@@ -138,33 +147,8 @@ const Profile = () => {
     setUser(user);
     setDivisionId(user.divisionId);
 
-    setUserTasks(
-      tasks.filter((item) => {
-        if (!item.completed) {
-          return;
-        }
-
-        const existUserInPeople = item.people.find((item2) => item2 == user.id);
-
-        if (existUserInPeople) {
-          return item;
-        }
-      }),
-    );
-
-    setUserProjects(
-      projects.filter((item) => {
-        if (!item.status === "completed") {
-          return;
-        }
-
-        const existUserInPeople = item.people.find((item2) => item2 == user.id);
-
-        if (existUserInPeople) {
-          return item;
-        }
-      }),
-    );
+    setUserTasks(tasks.filter((item) => item.people.includes(user.id)));
+    setUserProjects(projects.filter((item) => item.people.includes(user.id)));
   }, [id, myself, tasks, projects]);
 
   useEffect(() => {
@@ -191,7 +175,7 @@ const Profile = () => {
         <div className="flex w-fit flex-col gap-10 rounded-lg bg-blue-50 p-10">
           {/* image */}
           <img
-            src={user?.imgPath}
+            src={user.imgPath ?? avatarImg}
             className="h-40 w-40 self-center rounded-lg object-cover"
           />
 
@@ -223,8 +207,11 @@ const Profile = () => {
                 )}
           </div>
 
+          {/* change profile and logout buttons */}
           <div className="flex items-center justify-center gap-3">
-            <PrimaryButton cname="self-center">Change Profile</PrimaryButton>
+            <PrimaryButton cname="self-center" href="/profile/edit">
+              Change Profile
+            </PrimaryButton>
 
             <PrimaryButton
               cname="self-center bg-red-600 hover:bg-red-700"
@@ -293,13 +280,13 @@ const Profile = () => {
                 <div
                   className="absolute h-5 rounded-md bg-orange-600"
                   style={{
-                    width: `calc((${12}/${33})*100%)`,
+                    width: `calc((${completedUserTasks.length}/${userTasks.length})*100%)`,
                   }}
                 ></div>
               </div>
 
               <p className="text-xs text-gray-500">
-                Completed {12} / {33} Tasks
+                Completed {completedUserTasks.length} / {userTasks.length} Tasks
               </p>
             </div>
 
@@ -309,13 +296,14 @@ const Profile = () => {
                 <div
                   className="absolute h-5 rounded-md bg-orange-600"
                   style={{
-                    width: `calc((${21}/${43})*100%)`,
+                    width: `calc((${completedUserProjects.length}/${userProjects.length})*100%)`,
                   }}
                 ></div>
               </div>
 
               <p className="text-xs text-gray-500">
-                Completed {21} / {43} Projects
+                Completed {completedUserProjects.length} / {userProjects.length}{" "}
+                Projects
               </p>
             </div>
           </div>
@@ -328,26 +316,35 @@ const Profile = () => {
         <h1 className="text-xl font-bold">Completed Tasks</h1>
 
         {/* tasks */}
-        <div className="flex flex-col gap-3">
-          {paginatedTasks.map((item, idx) => (
-            <Link
-              key={idx}
-              to={`/tasks/${item.id}`}
-              className="flex cursor-pointer items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
-            >
-              <CircleIcon
-                sx={{
-                  fontSize: "15px",
-                  marginLeft: "15px",
-                  marginRight: "15px",
-                  color: "darkslategray",
-                }}
-              />
+        {paginatedTasks.length > 0 && (
+          <div className="flex flex-col gap-3">
+            {paginatedTasks.map((item, idx) => (
+              <Link
+                key={idx}
+                to={`/tasks/${item.id}`}
+                className="flex cursor-pointer items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
+              >
+                <CircleIcon
+                  sx={{
+                    fontSize: "15px",
+                    marginLeft: "15px",
+                    marginRight: "15px",
+                    color: "darkslategray",
+                  }}
+                />
 
-              <Task task={item} type="no_action" />
-            </Link>
-          ))}
-        </div>
+                <Task task={item} type="no_action" />
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* no task message box */}
+        {paginatedTasks.length === 0 && (
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+            <p>There is no task</p>
+          </div>
+        )}
 
         {/* pagination buttons */}
         <div className="flex items-center gap-3 self-end text-xs">
@@ -396,7 +393,16 @@ const Profile = () => {
         <h1 className="text-xl font-bold">Completed Projects</h1>
 
         {/* projects */}
-        <ProjectsTable projects={paginatedProjects} />
+        {paginatedProjects.length > 0 && (
+          <ProjectsTable projects={paginatedProjects} />
+        )}
+
+        {/* no project message box */}
+        {paginatedProjects.length === 0 && (
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+            <p>There is no project</p>
+          </div>
+        )}
 
         {/* pagination buttons */}
         <div className="flex items-center gap-3 self-end text-xs">
@@ -423,7 +429,7 @@ const Profile = () => {
             <div
               onClick={() =>
                 setProjectCurrentPage((prev) => {
-                  if (prev === totalPages) {
+                  if (prev === projectTotalPages) {
                     return prev;
                   }
 

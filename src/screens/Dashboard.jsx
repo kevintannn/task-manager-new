@@ -65,7 +65,7 @@ const Dashboard = () => {
                   : "Task of " + format(selectedDate, "dd MMMM yyyy")}
               </h1>
 
-              <PrimaryButton type="link" href={"/tasks/create"}>
+              <PrimaryButton href={"/tasks/create"}>
                 <AddIcon className="absolute -mt-0.5" fontSize="small" />
                 <span className="ml-7 mr-1">Create New Task</span>
               </PrimaryButton>

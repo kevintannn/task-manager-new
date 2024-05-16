@@ -13,6 +13,7 @@ import IconLabel from "./IconLabel";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { avatarImg } from "../constants";
 
 const ProjectsTable = ({ projects, fontsize }) => {
   const [users, setUsers] = useState([]);
@@ -30,9 +31,6 @@ const ProjectsTable = ({ projects, fontsize }) => {
         : [],
     );
   }, []);
-
-  console.log(projects);
-  // TODO: continue here, fix error if got
 
   return (
     <TableContainer>
@@ -85,7 +83,7 @@ const ProjectsTable = ({ projects, fontsize }) => {
                   {item.people.map((item2, idx) => (
                     <img
                       key={idx}
-                      src={users.find((item) => item.id == item2)?.imgPath}
+                      src={users.find((item) => item.id == item2)?.imgPath ?? avatarImg}
                       className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
                     />
                   ))}

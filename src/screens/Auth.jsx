@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import MyLogo from "../components/MyLogo";
 import { validatePassword, validateUsername } from "../utils/validations";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authActions } from "../store/authSlice";
 import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
+import { uiActions } from "../store/uiSlice";
 
 const Auth = () => {
+  const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const [users, setUsers] = useState([]);
@@ -17,6 +19,8 @@ const Auth = () => {
   const [passwordError, setPasswordError] = useState(null);
 
   const loginRef = useRef(null);
+
+  const navigate = useNavigate();
 
   const handleLogin = () => {
     if (usernameError || passwordError) {
@@ -40,9 +44,25 @@ const Auth = () => {
 
         dispatch(authActions.login(userWithoutPassword));
         localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+
+        dispatch(
+          uiActions.setNotification({
+            type: "success",
+            message: "You are logged in!",
+            open: true,
+          }),
+        );
+
+        return navigate("/");
       } else {
-        alert("Account not registered / wrong credentials!");
-        setUsername("");
+        dispatch(
+          uiActions.setNotification({
+            type: "error",
+            message: "Account not found / wrong credentials!",
+            open: true,
+          }),
+        );
+
         setPassword("");
       }
     }
@@ -58,7 +78,9 @@ const Auth = () => {
     );
   }, []);
 
-  return (
+  return auth.user.id ? (
+    <Navigate to="/" />
+  ) : (
     <div className="relative flex h-screen w-screen items-center justify-center text-sm">
       <div className="flex w-[350px] flex-col justify-center">
         <div className="mb-5 flex flex-col gap-1">
@@ -116,7 +138,10 @@ const Auth = () => {
 
         <p className="text-center ">
           Not registered yet?{" "}
-          <Link className="font-bold text-blue-700 hover:underline">
+          <Link
+            to="/register"
+            className="font-bold text-blue-700 hover:underline"
+          >
             Create an account <ArrowOutwardIcon fontSize="small" />
           </Link>
         </p>

@@ -1,8 +1,7 @@
 /* eslint-disable react/prop-types */
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import { useDispatch, useSelector } from "react-redux";
-import Auth from "./screens/Auth";
 import { useEffect, useState } from "react";
 import { getUser } from "./store/authActions";
 import { getTasks } from "./store/taskActions";
@@ -12,9 +11,10 @@ import { getProjects } from "./store/projectActions";
 import { divisions, projects, tasks, users } from "./data";
 
 const App = () => {
+  const { pathname } = useLocation();
+
   const auth = useSelector((state) => state.auth);
   const notification = useSelector((state) => state.ui.notification);
-
   const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(true);
@@ -54,7 +54,14 @@ const App = () => {
       <>
         <Notification notification={notification} />
 
-        {!auth.user.id && <Auth />}
+        {!auth.user.id && <Navigate to="/login" />}
+        {!auth.user.id && pathname === "/register" && (
+          <Navigate to="/register" />
+        )}
+
+        {!auth.user.id && ["/login", "/register"].includes(pathname) && (
+          <Outlet />
+        )}
 
         {auth.user.id && (
           <div className="flex h-screen">

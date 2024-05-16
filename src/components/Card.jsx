@@ -6,6 +6,7 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Link } from "react-router-dom";
 import { getDuration } from "../utils";
 import { useEffect, useState } from "react";
+import { avatarImg } from "../constants";
 
 const types = {
   high: "shadow-md hover:shadow-lg",
@@ -88,7 +89,9 @@ const Card = ({ task }) => {
             {task.people.map((item, idx) => (
               <img
                 key={idx}
-                src={users.find((item2) => item2.id == item)?.imgPath}
+                src={
+                  users.find((item2) => item2.id == item)?.imgPath ?? avatarImg
+                }
                 className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
               />
             ))}

@@ -6,14 +6,13 @@ import { Link } from "react-router-dom";
 const PrimaryButton = ({
   children,
   cname,
-  type = "button",
   href,
   handleClick,
   forwardedRef,
 }) => {
   return (
     <>
-      {type === "button" && (
+      {!href && (
         <button
           ref={forwardedRef}
           className={clsx(
@@ -26,7 +25,7 @@ const PrimaryButton = ({
         </button>
       )}
 
-      {type === "link" && (
+      {href && (
         <Link
           to={href}
           className={clsx(

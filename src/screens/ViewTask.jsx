@@ -108,7 +108,6 @@ const ViewTask = () => {
                 {/* edit button */}
                 <PrimaryButton
                   cname={"py-2 w-fit self-end"}
-                  type="link"
                   href={`/tasks/${task.id}/edit`}
                 >
                   Edit

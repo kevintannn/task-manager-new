@@ -18,6 +18,9 @@ import CreateProject from "./screens/CreateProject.jsx";
 import ViewProject from "./screens/ViewProject.jsx";
 import EditProject from "./screens/EditProject.jsx";
 import Completion from "./screens/Completion.jsx";
+import Auth from "./screens/Auth.jsx";
+import Register from "./screens/Register.jsx";
+import EditProfile from "./screens/EditProfile.jsx";
 
 const router = createBrowserRouter([
   {
@@ -76,6 +79,22 @@ const router = createBrowserRouter([
       {
         path: "/profile/:id",
         element: <Profile />,
+      },
+      {
+        path: "/profile/edit",
+        element: <EditProfile />,
+      },
+      {
+        path: "/login",
+        element: <Auth />,
+      },
+      {
+        path: "/register",
+        element: <Register />,
+      },
+      {
+        path: "*",
+        element: <Dashboard />,
       },
     ],
   },

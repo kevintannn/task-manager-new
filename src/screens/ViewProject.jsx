@@ -70,7 +70,6 @@ const ViewProject = () => {
               <div className="flex items-center gap-1">
                 <PrimaryButton
                   cname={"py-2 w-fit self-end"}
-                  type="link"
                   href={`/projects/${project.id}/edit`}
                 >
                   Edit
