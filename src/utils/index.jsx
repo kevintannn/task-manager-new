@@ -1,5 +1,4 @@
 import { format } from "date-fns";
-import { useSelector } from "react-redux";
 
 export const getDuration = (startDateTime, endDateTime) => {
   if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
