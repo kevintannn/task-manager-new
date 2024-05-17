@@ -121,3 +121,7 @@ export const validateDeadline = (deadline) => {
 export const validateProjectType = (projectType) => {
   return null;
 };
+
+export const validateTitle = (title) => {
+  return null;
+};
