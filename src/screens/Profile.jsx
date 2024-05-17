@@ -11,6 +11,7 @@ import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import ProjectsTable from "../components/ProjectsTable";
 import { avatarImg } from "../constants";
+import { createActivity } from "../utils";
 
 const formatFieldName = (fieldName) => {
   if (fieldName === "id") {
@@ -118,6 +119,16 @@ const Profile = () => {
       );
 
       dispatch(authActions.changeDivisionId(divisionId));
+
+      createActivity(
+        myself.id,
+        `changed division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
+      );
+    } else {
+      createActivity(
+        myself.id,
+        `changed ${user.name} division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
+      );
     }
 
     dispatch(
