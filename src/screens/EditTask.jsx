@@ -110,33 +110,28 @@ const EditTask = () => {
     // update database
     const existingTasksJSON = localStorage.getItem("tasks");
     const existingTasks = existingTasksJSON
-      ? JSON.parse(existingTasksJSON)
+      ? JSON.parse(existingTasksJSON).map((item) => {
+          if (item.id == task.id) {
+            return {
+              ...item,
+              title,
+              description,
+              priority: priority.toLowerCase(),
+              division,
+              people: [task.people[0], ...selectedPeople],
+              startDateTime: startDate,
+              endDateTime: endDate,
+              updatedBy: user.id,
+              updatedAt: new Date(),
+            };
+          }
+
+          return item;
+        })
       : [];
 
-    const existingTask = existingTasks.find((item) => item.id == task.id);
-    const existingTaskUpdated = {
-      ...existingTask,
-      title,
-      description,
-      priority: priority.toLowerCase(),
-      division,
-      people: [task.people[0], ...selectedPeople],
-      startDateTime: startDate,
-      endDateTime: endDate,
-      updatedBy: user.id,
-      updatedAt: new Date(),
-    };
-
-    const existingTasksUpdated = existingTasks.map((item) => {
-      if (item.id == task.id) {
-        return { ...item, ...existingTaskUpdated };
-      }
-
-      return item;
-    });
-
-    localStorage.setItem("tasks", JSON.stringify(existingTasksUpdated));
-    dispatch(taskActions.replaceTasks(existingTasksUpdated));
+    localStorage.setItem("tasks", JSON.stringify(existingTasks));
+    dispatch(taskActions.replaceTasks(existingTasks));
 
     dispatch(
       uiActions.setNotification({
@@ -146,16 +141,18 @@ const EditTask = () => {
       }),
     );
 
+    const existingTask = existingTasks.find((item) => item.id == task.id);
+
     createActivity(
       user.id,
-      `updated the details of "${existingTaskUpdated.title}" task.`,
+      `updated the details of "${existingTask.title}" task.`,
     );
 
     // check if title is updated
-    if (existingTask.title !== existingTaskUpdated.title) {
+    if (task.title !== existingTask.title) {
       createActivity(
         user.id,
-        `updated task title from "${existingTask.title}" to "${existingTaskUpdated.title}".`,
+        `updated task title from "${task.title}" to "${existingTask.title}".`,
       );
     }
 
