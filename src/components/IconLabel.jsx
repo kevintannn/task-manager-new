@@ -5,6 +5,7 @@ import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import ReplyIcon from "@mui/icons-material/Reply";
+import clsx from "clsx";
 
 const IconLabel = ({
   type,
@@ -44,7 +45,10 @@ const IconLabel = ({
 
   return (
     <div
-      className={`${cname} ${iconTypes[type]?.color ?? "text-gray-600"} ${hoverable ? "cursor-pointer text-gray-500 hover:text-gray-700" : "cursor-default text-gray-600"} flex items-center gap-2`}
+      className={clsx(
+        cname,
+        `${iconTypes[type]?.color ?? "text-gray-600"} ${hoverable ? "cursor-pointer text-gray-500 hover:text-gray-700" : "cursor-default text-gray-600"} flex items-center gap-2`,
+      )}
     >
       <div className="-mt-0.5">
         {iconTypes[type]?.Icon ?? iconTypes["ongoing"].Icon}

@@ -16,8 +16,8 @@ const PrimaryButton = ({
         <button
           ref={forwardedRef}
           className={clsx(
-            "relative flex items-center rounded-lg bg-blue-950 p-3 text-xs text-white duration-150 hover:bg-blue-900",
             cname,
+            "relative flex items-center rounded-lg bg-blue-950 p-3 text-xs text-white duration-150 hover:bg-blue-900",
           )}
           onClick={handleClick}
         >
@@ -29,8 +29,8 @@ const PrimaryButton = ({
         <Link
           to={href}
           className={clsx(
-            "relative flex items-center rounded-lg bg-blue-950 p-3 text-xs text-white duration-150 hover:bg-blue-900",
             cname,
+            "relative flex items-center rounded-lg bg-blue-950 p-3 text-xs text-white duration-150 hover:bg-blue-900",
           )}
         >
           {children}
