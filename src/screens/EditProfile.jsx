@@ -87,33 +87,38 @@ const EditProfile = () => {
 
     // update user
     const existingUsersJSON = localStorage.getItem("users");
-    let existingUsers = existingUsersJSON
-      ? JSON.parse(localStorage.getItem("users"))
+    const existingUsers = existingUsersJSON
+      ? JSON.parse(localStorage.getItem("users")).map((item) => {
+          if (item.id == user.id) {
+            return {
+              ...item,
+              name,
+              email,
+              username,
+              contactNumber,
+              gender,
+            };
+          }
+
+          return item;
+        })
       : [];
 
-    // check for field that is changing
     const existingUser = existingUsers.find((item) => item.id == user.id);
-    const existingUserUpdated = {
-      ...existingUser,
-      name,
-      email,
-      username,
-      contactNumber,
-      gender,
-    };
 
+    // check for fields that changed
     const changedFields = [];
     Object.keys(existingUser).forEach((element) => {
       if (element === "password") {
         return;
       }
 
-      if (existingUser[element] !== existingUserUpdated[element]) {
+      if (existingUser[element] !== user[element]) {
         changedFields.push(element);
       }
     });
 
-    // check if email and username is taken
+    // check if email is taken
     if (changedFields.includes("email")) {
       const existEmail = users.find((item) => item.email === email);
 
@@ -123,6 +128,7 @@ const EditProfile = () => {
       }
     }
 
+    // check if username is taken
     if (changedFields.includes("username")) {
       const existUsername = users.find((item) => item.username === username);
 
@@ -149,16 +155,7 @@ const EditProfile = () => {
       return;
     }
 
-    // update user
-    existingUsers = existingUsers.map((item) => {
-      if (item.id == user.id) {
-        return { ...item, ...existingUserUpdated };
-      }
-
-      return item;
-    });
-
-    const { password, ...userWithoutPassword } = existingUserUpdated;
+    const { password, ...userWithoutPassword } = existingUser;
 
     localStorage.setItem("users", JSON.stringify(existingUsers));
     localStorage.setItem("user", JSON.stringify(userWithoutPassword));
