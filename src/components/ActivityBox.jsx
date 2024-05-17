@@ -1,9 +1,11 @@
 /* eslint-disable react/prop-types */
+import CloseIcon from "@mui/icons-material/Close";
 import { formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import { avatarImg } from "../constants";
+import clsx from "clsx";
 
-const ActivityBox = ({ activities }) => {
+const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
@@ -15,19 +17,35 @@ const ActivityBox = ({ activities }) => {
   }, []);
 
   return (
-    <div className="flex flex-col rounded-lg bg-blue-50/50 p-5 text-xs">
+    <div
+      className={clsx(
+        cname,
+        "flex flex-col rounded-lg bg-blue-50/50 p-5 text-xs",
+      )}
+    >
       {/* header */}
       <div className="flex items-center justify-between border-b-2 border-b-gray-200 pb-3">
         <h1 className="text-lg font-bold">Activity</h1>
-        <p className="cursor-pointer text-sm text-blue-800 hover:text-blue-400">
-          See All
-        </p>
+        {limit ? (
+          <p
+            className="cursor-pointer text-sm text-blue-800 hover:text-blue-400"
+            onClick={showModal}
+          >
+            See All
+          </p>
+        ) : (
+          <div className="cursor-pointer" onClick={closeModal}>
+            <CloseIcon />
+          </div>
+        )}
       </div>
 
       {/* content */}
-      {activities.map(
-        (item, idx) =>
-          idx < 6 && (
+      {activities.map((item, idx) => {
+        const render = idx < limit || !limit;
+
+        return (
+          render && (
             <div key={idx} className="mt-3 flex items-center gap-5">
               <img
                 src={
@@ -54,8 +72,9 @@ const ActivityBox = ({ activities }) => {
                 </p>
               </div>
             </div>
-          ),
-      )}
+          )
+        );
+      })}
     </div>
   );
 };
