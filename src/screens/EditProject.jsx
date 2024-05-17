@@ -105,35 +105,28 @@ const EditProject = () => {
     // update database
     const existingProjectsJSON = localStorage.getItem("projects");
     const existingProjects = existingProjectsJSON
-      ? JSON.parse(existingProjectsJSON)
+      ? JSON.parse(existingProjectsJSON).map((item) => {
+          if (item.id == project.id) {
+            return {
+              ...item,
+              projectName,
+              deadline,
+              projectType,
+              people: [project.people[0], ...selectedPeople],
+              description,
+              status,
+              updatedBy: user.id,
+              updatedAt: new Date(),
+            };
+          }
+
+          return item;
+        })
       : [];
-      
-    const existingProject = existingProjects.find(
-      (item) => item.id == project.id,
-    );
-    const existingProjectUpdated = {
-      ...existingProject,
-      projectName,
-      deadline,
-      projectType,
-      people: [project.people[0], ...selectedPeople],
-      description,
-      status,
-      updatedBy: user.id,
-      updatedAt: new Date(),
-    };
 
-    const existingProjectsUpdated = existingProjects.map((item) => {
-      if (item.id == project.id) {
-        return { ...item, ...existingProjectUpdated };
-      }
+    localStorage.setItem("projects", JSON.stringify(existingProjects));
 
-      return item;
-    });
-
-    localStorage.setItem("projects", JSON.stringify(existingProjectsUpdated));
-
-    dispatch(projectActions.replaceProjects(existingProjectsUpdated));
+    dispatch(projectActions.replaceProjects(existingProjects));
 
     dispatch(
       uiActions.setNotification({
@@ -143,24 +136,28 @@ const EditProject = () => {
       }),
     );
 
-    createActivity(
-      user.id,
-      `updated the details of "${existingProjectUpdated.projectName}" project.`,
+    const existingProject = existingProjects.find(
+      (item) => item.id == project.id,
     );
 
-    // check if title is updated
-    if (existingProject.projectName !== existingProjectUpdated.projectName) {
+    createActivity(
+      user.id,
+      `updated the details of "${existingProject.projectName}" project.`,
+    );
+
+    // check if status is updated
+    if (project.status !== existingProject.status) {
       createActivity(
         user.id,
-        `changed project name of "${existingProject.projectName}" to "${existingProjectUpdated.projectName}".`,
+        `changed project status of "${existingProject.projectName}" from "${project.status}" to "${existingProject.status}".`,
       );
     }
 
-    // check if status is updated
-    if (existingProject.status !== existingProjectUpdated.status) {
+    // check if title is updated
+    if (project.projectName !== existingProject.projectName) {
       createActivity(
         user.id,
-        `changed project status of "${existingProjectUpdated.projectName}" from "${existingProject.status}" to "${existingProjectUpdated.status}".`,
+        `changed project name of "${project.projectName}" to "${existingProject.projectName}".`,
       );
     }
 
