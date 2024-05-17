@@ -21,6 +21,8 @@ import Completion from "./screens/Completion.jsx";
 import Auth from "./screens/Auth.jsx";
 import Register from "./screens/Register.jsx";
 import EditProfile from "./screens/EditProfile.jsx";
+import Forum from "./screens/Forum.jsx";
+import ViewForum from "./screens/ViewForum.jsx";
 
 const router = createBrowserRouter([
   {
@@ -71,6 +73,14 @@ const router = createBrowserRouter([
       {
         path: "/completion",
         element: <Completion />,
+      },
+      {
+        path: "/forum",
+        element: <Forum />,
+      },
+      {
+        path: "/forum/:id",
+        element: <ViewForum />,
       },
       {
         path: "/profile",
