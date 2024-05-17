@@ -1,5 +1,3 @@
-import PersonImg from "../assets/asd.jpg";
-
 export const users = [
   {
     id: 1,
@@ -683,59 +681,51 @@ export const projects = [
   },
 ];
 
-// export const activities = [
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date(2024, 3, 27, 15, 10),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-//   {
-//     img: PersonImg,
-//     name: "John Paul",
-//     activity: "updated the content for INSU project.",
-//     datetime: new Date("2024-02-04"),
-//   },
-// ];
+export const discussions = [
+  {
+    id: 1,
+    title: "How to meet with you?",
+    content:
+      "I want to ask about things that is not so trivia but also not easy. It's the famous how to meet with you. If anybody here knows a thing or two about this, please kindly leave a reply. Thanks!",
+    upvotes: [5, 2, 3],
+    replies: [
+      {
+        id: 1,
+        message: "Just meet with me la easy.",
+        createdBy: 2,
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        message: "You can go to the thing and do the theng.",
+        createdBy: 3,
+        createdAt: new Date(),
+      },
+    ],
+    createdBy: 1,
+    createdAt: new Date(),
+  },
+  {
+    id: 2,
+    title: "How to center a div?",
+    content:
+      "Yesterday, my wife and I discovered a new website. The website named aang, but I struggled hard to center the div. If anybody knows how, please comment!",
+    upvotes: [2, 3, 4],
+    replies: [
+      {
+        id: 1,
+        message: "You can go to w3school and learn it.",
+        createdBy: 2,
+        createdAt: new Date(),
+      },
+      {
+        id: 2,
+        message: "Just do it!!!!!!",
+        createdBy: 1,
+        createdAt: new Date(),
+      },
+    ],
+    createdBy: 5,
+    createdAt: new Date(),
+  },
+];
