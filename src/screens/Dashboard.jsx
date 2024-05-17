@@ -1,48 +1,67 @@
-import AddIcon from "@mui/icons-material/Add";
 // import "react-calendar/dist/Calendar.css";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import AddIcon from "@mui/icons-material/Add";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import "../calendar.css";
-import ReplyIcon from "@mui/icons-material/Reply";
-import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Card from "../components/Card";
 import TopBar from "../components/TopBar";
-import PersonImg from "../assets/asd.jpg";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-} from "@mui/material";
 import Calendar from "react-calendar";
 import ActivityBox from "../components/ActivityBox";
-import { activities, projects, tasks } from "../data";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import PrimaryButton from "../components/PrimaryButton";
+import { useSelector } from "react-redux";
+import ProjectsTable from "../components/ProjectsTable";
+import { Link } from "react-router-dom";
+import IconLabel from "../components/IconLabel";
+import { Modal } from "@mui/material";
 
 const Dashboard = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentPage, setCurrentPage] = useState(1);
+  const tasks = useSelector((state) => state.task.tasks);
+  const projects = useSelector((state) => state.project.projects);
 
-  const filteredTasks = tasks.filter(
-    (item) => item.startdatetime.toDateString() === selectedDate.toDateString(),
+  const [activities, setActivities] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date(new Date().toDateString()),
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const filteredTasks = tasks.filter((item) => {
+    const startDate = new Date(new Date(item.startDateTime).toDateString()); // the purpose of nesting new Date() is to set the hours to 00:00:00 so we only compare date
+    const endDate = new Date(new Date(item.endDateTime).toDateString());
+
+    if (startDate <= selectedDate && endDate >= selectedDate) {
+      return item;
+    }
+  });
+
+  const searchedTasks = filteredTasks.filter((item) =>
+    item.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   const pageSize = 6;
-  const totalPages = Math.ceil(filteredTasks.length / pageSize);
+  const totalPages = Math.ceil(searchedTasks.length / pageSize);
   const startIdx = (currentPage - 1) * pageSize;
-  const paginatedTasks = filteredTasks.slice(startIdx, startIdx + pageSize);
+  const paginatedTasks = searchedTasks.slice(startIdx, startIdx + pageSize);
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
 
+  useEffect(() => {
+    setActivities(
+      localStorage.getItem("activities")
+        ? JSON.parse(localStorage.getItem("activities")).sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+          )
+        : [],
+    );
+  }, []);
+
   return (
     <div className="flex flex-col">
-      <TopBar />
+      <TopBar search={search} setSearch={setSearch} />
 
       {/* left and right section */}
       <div className="my-10 flex gap-5">
@@ -58,18 +77,26 @@ const Dashboard = () => {
                   : "Task of " + format(selectedDate, "dd MMMM yyyy")}
               </h1>
 
-              <PrimaryButton>
+              <PrimaryButton href={"/tasks/create"}>
                 <AddIcon className="absolute -mt-0.5" fontSize="small" />
                 <span className="ml-7 mr-1">Create New Task</span>
               </PrimaryButton>
             </div>
 
             {/* cards */}
-            <div className="grid grid-cols-3 gap-4">
-              {paginatedTasks.map((item, idx) => (
-                <Card key={idx} task={item} />
-              ))}
-            </div>
+            {searchedTasks.length > 0 && (
+              <div className="grid grid-cols-3 gap-4">
+                {paginatedTasks.map((item, idx) => (
+                  <Card key={idx} task={item} />
+                ))}
+              </div>
+            )}
+
+            {searchedTasks.length === 0 && (
+              <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+                <p>There is no task</p>
+              </div>
+            )}
 
             {/* pagination buttons */}
             <div className="flex items-center gap-3 self-end text-xs">
@@ -121,90 +148,30 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <h1 className="text-xl font-bold">Projects</h1>
 
-              <div className="flex items-center gap-5 text-xs text-gray-500">
-                <div className="flex cursor-pointer items-center gap-2 hover:text-gray-700">
-                  <CloudDownloadIcon
-                    sx={{
-                      fontSize: "17px",
-                    }}
-                  />
-                  <p>Export</p>
-                </div>
+              <div className="flex items-center gap-5 text-xs">
+                <IconLabel type="export" hoverable={true} />
 
-                <div className="flex cursor-pointer items-center gap-2 hover:text-gray-700">
-                  <ReplyIcon fontSize="small" />
-                  <p>Share</p>
-                </div>
+                <IconLabel type="share" hoverable={true} />
 
-                <div className="cursor-pointer">
-                  <MoreHorizIcon
-                    fontSize="large"
-                    className="text-blue-900 hover:text-blue-500"
-                  />
-                </div>
+                <Link
+                  to="/projects/create"
+                  className="flex cursor-pointer items-center gap-1 rounded-lg bg-blue-950 p-1.5 px-2 text-white hover:bg-blue-900"
+                >
+                  <AddCircleIcon />
+
+                  <p className="mr-1">Create</p>
+                </Link>
               </div>
             </div>
 
             {/* table */}
-            <div>
-              <TableContainer>
-                <Table
-                  sx={{
-                    "th, td": {
-                      border: 0,
-                      fontFamily: "Merriweather, serif",
-                      fontSize: "12px",
-                    },
-                    "tr th": {
-                      backgroundColor: "#f9f7fc",
-                      fontWeight: "bold",
-                      color: "slategray",
-                      borderRadius: "10px",
-                    },
-                  }}
-                >
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Project Name</TableCell>
-                      <TableCell>Deadline</TableCell>
-                      <TableCell>Project Type</TableCell>
-                      <TableCell>Project Team</TableCell>
-                      <TableCell>Project Status</TableCell>
-                      <TableCell></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {projects.map((item, idx) => (
-                      <TableRow key={idx}>
-                        <TableCell>{item.name}</TableCell>
-                        <TableCell>{item.deadline}</TableCell>
-                        <TableCell>{item.type}</TableCell>
-                        <TableCell>
-                          <div className="flex">
-                            {item.team.map((item2, idx) => (
-                              <img
-                                key={idx}
-                                src={PersonImg}
-                                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-2 border-white object-contain`}
-                              />
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <CheckCircleIcon sx={{ fontSize: "15px" }} />
-                            <p>{item.status}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <MoreHorizIcon fontSize="large" />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </div>
+            {projects.length <= 0 ? (
+              <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+                <p>There is no project</p>
+              </div>
+            ) : (
+              <ProjectsTable projects={projects} />
+            )}
           </div>
         </div>
 
@@ -212,9 +179,24 @@ const Dashboard = () => {
         <div className="flex w-[300px] flex-col gap-10">
           <Calendar onChange={(e) => setSelectedDate(new Date(e))} />
 
-          <ActivityBox activities={activities} />
+          <ActivityBox
+            activities={activities}
+            limit={6}
+            showModal={() => setModalVisible(true)}
+          />
         </div>
       </div>
+
+      {/* modal */}
+      <Modal open={modalVisible} onClose={() => setModalVisible(false)}>
+        <div className="flex h-full w-full items-center justify-center">
+          <ActivityBox
+            cname={"bg-white max-h-[600px] overflow-y-auto"}
+            activities={activities}
+            closeModal={() => setModalVisible(false)}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

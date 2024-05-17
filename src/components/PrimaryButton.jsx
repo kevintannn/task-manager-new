@@ -1,10 +1,42 @@
 /* eslint-disable react/prop-types */
 
-const PrimaryButton = ({ children }) => {
+import clsx from "clsx";
+import { Link } from "react-router-dom";
+
+const PrimaryButton = ({
+  children,
+  cname,
+  href,
+  handleClick,
+  forwardedRef,
+}) => {
   return (
-    <button className="relative flex items-center rounded-lg bg-blue-950 p-3 text-xs text-white duration-150 hover:bg-blue-900">
-      {children}
-    </button>
+    <>
+      {!href && (
+        <button
+          ref={forwardedRef}
+          className={clsx(
+            cname,
+            "relative flex items-center rounded-lg bg-blue-950 p-3 text-xs text-white duration-150 hover:bg-blue-900",
+          )}
+          onClick={handleClick}
+        >
+          {children}
+        </button>
+      )}
+
+      {href && (
+        <Link
+          to={href}
+          className={clsx(
+            cname,
+            "relative flex items-center rounded-lg bg-blue-950 p-3 text-xs text-white duration-150 hover:bg-blue-900",
+          )}
+        >
+          {children}
+        </Link>
+      )}
+    </>
   );
 };
 

@@ -4,8 +4,11 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
-const TopBar = ({ mode = "default" }) => {
+const TopBar = ({ search, setSearch, mode = "default" }) => {
+  const user = useSelector((state) => state.auth.user);
+
   return (
     <div
       className={`${mode === "only_profile" ? "justify-end" : "justify-between"} flex items-center text-sm`}
@@ -23,6 +26,8 @@ const TopBar = ({ mode = "default" }) => {
           <input
             className="w-96 rounded-md bg-blue-50 p-2 pl-10 outline-none"
             placeholder="Search for task or project"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       )}
@@ -40,11 +45,18 @@ const TopBar = ({ mode = "default" }) => {
           className="group flex h-12 cursor-pointer items-center justify-center gap-3 bg-gray-50 "
         >
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
-            <AccountCircleIcon />
+            {user.imgPath ? (
+              <img
+                src={user.imgPath}
+                className="h-9 w-9 rounded-full object-cover"
+              />
+            ) : (
+              <AccountCircleIcon />
+            )}
           </div>
 
           <div className="mr-5 duration-150 group-hover:ml-3 group-hover:mr-7">
-            <p>Kevin Tan</p>
+            <p>{user.name}</p>
             <p className="text-xs text-gray-500">Admin</p>
           </div>
 

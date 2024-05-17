@@ -1,19 +1,43 @@
-export const validateUsername = (username) => {
-  if (username.includes(" ")) {
-    return "Invalid username";
+import { format } from "date-fns";
+
+export const getDuration = (startDateTime, endDateTime) => {
+  if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
+    const startTime = format(startDateTime, "hh:mm a");
+    const endTime = format(endDateTime, "hh:mm a");
+    return `${startTime} - ${endTime}`;
   }
 
-  if (username.length > 0 && username.length < 5) {
-    return "Min. 5 characters";
-  }
-
-  return null;
+  const formatStartDateTime = format(startDateTime, "eee, d MMM y hh:mm a");
+  const formatEndDateTime = format(endDateTime, "eee, d MMM y hh:mm a");
+  return `${formatStartDateTime} - ${formatEndDateTime}`;
 };
 
-export const validatePassword = (password) => {
-  if (password.length > 0 && password.length <= 8) {
-    return "Min. 8 characters";
+export const stringSort = (array, order) => {
+  if (order === "asc") {
+    return array.sort();
   }
 
-  return null;
+  if (order === "desc") {
+    return array.sort((a, b) => b.localeCompare(a));
+  }
+};
+
+export const createActivity = (person, activity) => {
+  const existingActivitiesJSON = localStorage.getItem("activities");
+  const existingActivities = existingActivitiesJSON
+    ? JSON.parse(existingActivitiesJSON)
+    : [];
+
+  const newId = existingActivities?.[existingActivities.length - 1]?.id
+    ? parseInt(existingActivities?.[existingActivities.length - 1]?.id) + 1
+    : 1;
+
+  existingActivities.push({
+    id: newId,
+    person,
+    activity,
+    updatedAt: new Date(),
+  });
+
+  localStorage.setItem("activities", JSON.stringify(existingActivities));
 };

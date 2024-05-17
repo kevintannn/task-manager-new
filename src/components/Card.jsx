@@ -3,34 +3,67 @@ import CallIcon from "@mui/icons-material/Call";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { format } from "date-fns";
+import { Link } from "react-router-dom";
+import { getDuration } from "../utils";
+import { useEffect, useState } from "react";
+import { avatarImg } from "../constants";
 
 const types = {
-  type1: "shadow-md hover:shadow-lg",
-  type2: "bg-red-100/80 hover:shadow-lg",
-  type3: "bg-blue-50 hover:shadow-lg",
+  high: "shadow-md hover:shadow-lg",
+  medium: "bg-red-100/80 hover:shadow-lg",
+  low: "bg-blue-50 hover:shadow-lg",
 };
 
 const iconColors = {
-  type1: "darkslateblue",
-  type2: "brown",
-  type3: "darkslateblue",
+  high: "darkslateblue",
+  medium: "brown",
+  low: "darkslateblue",
 };
 
 const iconBackgrounds = {
-  type1: "bg-blue-100",
-  type2: "bg-red-200/80",
-  type3: "bg-blue-200/80",
+  high: "bg-blue-100",
+  medium: "bg-red-200/80",
+  low: "bg-blue-200/80",
 };
 
+// const types = {
+//   high: "bg-blue-50 hover:shadow-lg",
+//   medium: "bg-blue-50 hover:shadow-lg",
+//   low: "bg-blue-50 hover:shadow-lg",
+// };
+
+// const iconColors = {
+//   high: "darkslateblue",
+//   medium: "darkslateblue",
+//   low: "darkslateblue",
+// };
+
+// const iconBackgrounds = {
+//   high: "bg-blue-200/80",
+//   medium: "bg-blue-200/80",
+//   low: "bg-blue-200/80",
+// };
+
 const Card = ({ task }) => {
-  const startTime = format(task.startdatetime, "hh:mm a");
-  const endTime = format(task.enddatetime, "hh:mm a");
-  const duration = `${startTime} - ${endTime}`;
+  const [users, setUsers] = useState([]);
+
+  const startDateTime = new Date(task.startDateTime);
+  const endDateTime = new Date(task.endDateTime);
+
+  const duration = getDuration(startDateTime, endDateTime);
+
+  useEffect(() => {
+    setUsers(
+      localStorage.getItem("users")
+        ? JSON.parse(localStorage.getItem("users"))
+        : [],
+    );
+  }, []);
 
   return (
-    <div
-      className={`${types[task.type]} flex min-h-36 min-w-60 cursor-pointer flex-col justify-between rounded-lg p-5 text-sm duration-150`}
+    <Link
+      to={`/tasks/${task.id}`}
+      className={`${types[task.priority]} flex min-h-40 min-w-60 cursor-pointer flex-col justify-between rounded-lg p-5 text-sm duration-150`}
     >
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
@@ -41,41 +74,55 @@ const Card = ({ task }) => {
         <MoreVertIcon />
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center">
-          {task.people.map((item, idx) => (
-            <img
-              key={idx}
-              src={item.img}
-              className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-2 border-white object-contain`}
-            />
-          ))}
-        </div>
+      <div className="flex flex-col gap-1">
+        {/* completed mark */}
+        {task.completed && (
+          <p className="my-1 w-fit rounded-full bg-green-600 p-0.5 px-2 text-xs text-white">
+            Done
+          </p>
+        )}
 
-        <div
-          className={`${iconBackgrounds[task.type]} flex items-center justify-center gap-3 rounded-md p-2`}
-        >
-          <CallIcon
-            sx={{
-              color: iconColors[task.type],
-              fontSize: "15px",
-            }}
-          />
-          <VideocamIcon
-            sx={{
-              color: iconColors[task.type],
-              fontSize: "17px",
-            }}
-          />
-          <ChatBubbleIcon
-            sx={{
-              color: iconColors[task.type],
-              fontSize: "13px",
-            }}
-          />
+        {/* people avatars and call icons */}
+        <div className="flex items-center justify-between">
+          {/* people avatars */}
+          <div className="flex items-center">
+            {task.people.map((item, idx) => (
+              <img
+                key={idx}
+                src={
+                  users.find((item2) => item2.id == item)?.imgPath ?? avatarImg
+                }
+                className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
+              />
+            ))}
+          </div>
+
+          {/* call icons */}
+          <div
+            className={`${iconBackgrounds[task.priority]} flex items-center justify-center gap-3 rounded-md p-2`}
+          >
+            <CallIcon
+              sx={{
+                color: iconColors[task.priority],
+                fontSize: "15px",
+              }}
+            />
+            <VideocamIcon
+              sx={{
+                color: iconColors[task.priority],
+                fontSize: "17px",
+              }}
+            />
+            <ChatBubbleIcon
+              sx={{
+                color: iconColors[task.priority],
+                fontSize: "13px",
+              }}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
