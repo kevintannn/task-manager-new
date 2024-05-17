@@ -4,14 +4,16 @@ import slugify from "slugify";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useEffect, useRef, useState } from "react";
 import { uiActions } from "../store/uiSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Box, FormControlLabel, Paper, Radio, RadioGroup } from "@mui/material";
 import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckIcon from "@mui/icons-material/Check";
+import { createActivity } from "../utils";
 
 const People = () => {
+  const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
 
   const [users, setUsers] = useState([]);
@@ -84,6 +86,8 @@ const People = () => {
     setDivisionMode("add");
 
     setDivisionChangedSwitch(!divisionChangedSwitch);
+
+    createActivity(user.id, `added a new division "${divisionName}".`);
   };
 
   const deleteDivision = (divisionId) => {
@@ -119,6 +123,11 @@ const People = () => {
     );
 
     setDivisionChangedSwitch(!divisionChangedSwitch);
+
+    createActivity(
+      user.id,
+      `deleted division named "${divisions.find((item) => item.id == divisionId).name}".`,
+    );
   };
 
   const editDivision = (divisionId) => {
@@ -158,6 +167,11 @@ const People = () => {
     setEditInputToggleIdx(null);
 
     setDivisionChangedSwitch(!divisionChangedSwitch);
+
+    createActivity(
+      user.id,
+      `changed division name from "${divisions.find((item) => item.id == divisionId).name}" to "${divisionName}".`,
+    );
   };
 
   useEnterKeyPressEffect(saveRef);
@@ -315,6 +329,7 @@ const People = () => {
                 cname={"justify-center"}
                 handleClick={() => {
                   setDivisionName("");
+                  setEditInputToggleIdx(null);
                   setDivisionMode("save");
                 }}
               >
