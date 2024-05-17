@@ -8,7 +8,7 @@ import { getTasks } from "./store/taskActions";
 import { Alert, Snackbar } from "@mui/material";
 import { uiActions } from "./store/uiSlice";
 import { getProjects } from "./store/projectActions";
-import { divisions, projects, tasks, users } from "./data";
+import { discussions, divisions, projects, tasks, users } from "./data";
 
 const App = () => {
   const { pathname } = useLocation();
@@ -31,6 +31,7 @@ const App = () => {
     const existingUsersJSON = localStorage.getItem("users");
     const existingTasksJSON = localStorage.getItem("tasks");
     const existingProjectsJSON = localStorage.getItem("projects");
+    const existingDiscussionsJSON = localStorage.getItem("discussions");
 
     if (!existingDivisionsJSON) {
       localStorage.setItem("divisions", JSON.stringify(divisions));
@@ -46,6 +47,10 @@ const App = () => {
 
     if (!existingProjectsJSON) {
       localStorage.setItem("projects", JSON.stringify(projects));
+    }
+
+    if (!existingDiscussionsJSON) {
+      localStorage.setItem("discussions", JSON.stringify(discussions));
     }
   }, []);
 
