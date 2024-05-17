@@ -13,7 +13,7 @@ const sidebarLinks = [
   { icon: <PeopleIcon />, link: "/people" },
   { icon: <StorageIcon />, link: "/tasks" },
   { icon: <PieChartIcon />, link: "/completion" },
-  { icon: <ChatBubbleIcon />, link: null },
+  { icon: <ChatBubbleIcon />, link: "/forum" },
   { icon: <SettingsIcon />, link: "/profile" },
 ];
 
