@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import ProjectsTable from "../components/ProjectsTable";
 import { Link } from "react-router-dom";
 import IconLabel from "../components/IconLabel";
+import { Modal } from "@mui/material";
 
 const Dashboard = () => {
   const tasks = useSelector((state) => state.task.tasks);
@@ -26,6 +27,7 @@ const Dashboard = () => {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
 
   const filteredTasks = tasks.filter((item) => {
     const startDate = new Date(new Date(item.startDateTime).toDateString()); // the purpose of nesting new Date() is to set the hours to 00:00:00 so we only compare date
@@ -177,9 +179,24 @@ const Dashboard = () => {
         <div className="flex w-[300px] flex-col gap-10">
           <Calendar onChange={(e) => setSelectedDate(new Date(e))} />
 
-          <ActivityBox activities={activities} />
+          <ActivityBox
+            activities={activities}
+            limit={6}
+            showModal={() => setModalVisible(true)}
+          />
         </div>
       </div>
+
+      {/* modal */}
+      <Modal open={modalVisible} onClose={() => setModalVisible(false)}>
+        <div className="flex h-full w-full items-center justify-center">
+          <ActivityBox
+            cname={"bg-white max-h-[600px] overflow-y-auto"}
+            activities={activities}
+            closeModal={() => setModalVisible(false)}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };
