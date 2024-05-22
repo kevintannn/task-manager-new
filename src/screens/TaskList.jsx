@@ -64,40 +64,43 @@ const TaskList = () => {
 
         {/* date and tasks */}
         {tasksByDateGroup.length <= 0 ? (
-          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+          <div className="flex h-60 items-center justify-center rounded-xl text-gray-600">
             <p>There is no task</p>
           </div>
         ) : (
-          tasksByDateGroup.map((item, idx) => (
-            <div key={idx} className="flex flex-col gap-3">
-              {/* date */}
-              <p className="text-lg font-bold">
-                {isToday(Object.keys(item))
-                  ? "Today's Tasks"
-                  : `${format(new Date(Object.keys(item)), "E, dd MMM yyyy")}`}
-              </p>
+          tasksByDateGroup.map(
+            (item, idx) =>
+              item[Object.keys(item)].length > 0 && (
+                <div key={idx} className="flex flex-col gap-3">
+                  {/* date */}
+                  <p className="text-lg font-bold">
+                    {isToday(Object.keys(item))
+                      ? "Today's Tasks"
+                      : `${format(new Date(Object.keys(item)), "E, dd MMM yyyy")}`}
+                  </p>
 
-              {/* tasks */}
-              {item[Object.keys(item)].map((item2, idx) => (
-                <Link
-                  key={idx}
-                  to={`/tasks/${item2.id}`}
-                  className="flex cursor-pointer items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
-                >
-                  <CircleIcon
-                    sx={{
-                      fontSize: "15px",
-                      marginLeft: "15px",
-                      marginRight: "15px",
-                      color: "darkslategray",
-                    }}
-                  />
+                  {/* tasks */}
+                  {item[Object.keys(item)].map((item2, idx) => (
+                    <Link
+                      key={idx}
+                      to={`/tasks/${item2.id}`}
+                      className="flex cursor-pointer items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
+                    >
+                      <CircleIcon
+                        sx={{
+                          fontSize: "15px",
+                          marginLeft: "15px",
+                          marginRight: "15px",
+                          color: "darkslategray",
+                        }}
+                      />
 
-                  <Task task={item2} />
-                </Link>
-              ))}
-            </div>
-          ))
+                      <Task task={item2} />
+                    </Link>
+                  ))}
+                </div>
+              ),
+          )
         )}
       </div>
     </ListLayout>
