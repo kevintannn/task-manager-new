@@ -126,18 +126,18 @@ const ViewForum = () => {
   return (
     <div className="mx-10 mt-5 flex flex-col gap-10 pb-20">
       {/* top box */}
-      <div className="flex flex-col gap-5 rounded-xl p-5 shadow-lg">
+      <div className="flex flex-col gap-5 rounded-xl p-10 shadow-lg">
         <Link
           to="/forum"
-          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-100 hover:bg-blue-50"
+          className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-blue-100 transition-all duration-150 hover:bg-blue-50"
         >
-          <ArrowBackIcon className="text-blue-900" />
+          <ArrowBackIcon className="text-blue-700" />
         </Link>
 
         {/* avatar, name, and more button */}
         <div className="flex justify-between">
           {/* avatar and name */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-5">
             {/* avatar */}
             <img
               src={
@@ -173,7 +173,7 @@ const ViewForum = () => {
             {toggleMore && (
               <div className="absolute right-0">
                 <PrimaryButton
-                  cname={"w-[150px] justify-center"}
+                  cname={"w-[150px] justify-center bg-red-700 hover:bg-red-600"}
                   handleClick={deleteDiscussion}
                 >
                   Delete Discussion
@@ -190,7 +190,7 @@ const ViewForum = () => {
         <p className="text-sm text-gray-700">{discussion?.content}</p>
 
         {/* informations and action buttons */}
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-3">
           {/* informations */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
@@ -206,7 +206,7 @@ const ViewForum = () => {
           {/* action buttons */}
           <div className="flex items-center justify-center gap-3">
             <div
-              className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-gray-400 p-2 hover:bg-blue-50"
+              className={`flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-gray-300 ${discussion?.upvotes.findIndex((item) => item == user.id) !== -1 ? "bg-blue-50" : ""} p-2`}
               onClick={handleUpvote}
             >
               <KeyboardDoubleArrowUpIcon />
@@ -217,7 +217,7 @@ const ViewForum = () => {
               </p>
             </div>
 
-            <div className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-gray-400 p-2 hover:bg-blue-50">
+            <div className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-gray-300 p-2">
               <ShareIcon fontSize="small" />
               <p className="text-sm font-semibold">Share</p>
             </div>
@@ -246,7 +246,7 @@ const ViewForum = () => {
         <p className="text-xl font-bold">Replies</p>
 
         {/* bottom box */}
-        <div className="flex flex-col gap-7 rounded-xl p-5 shadow-lg">
+        <div className="flex flex-col gap-5 rounded-xl p-5 shadow-lg">
           {/* chats */}
           {discussion?.replies?.length > 0 &&
             discussion?.replies
@@ -264,7 +264,7 @@ const ViewForum = () => {
                       className="h-10 w-10 rounded-full object-cover"
                     />
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
                       {/* name and time */}
                       <div className="flex flex-col">
                         <p className="font-bold">
