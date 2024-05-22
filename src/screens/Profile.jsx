@@ -7,11 +7,10 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Task } from "../components/Task";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import ProjectsTable from "../components/ProjectsTable";
 import { avatarImg } from "../constants";
 import { createActivity } from "../utils";
+import PaginationButtons from "../components/PaginationButtons";
 
 const formatFieldName = (fieldName) => {
   if (fieldName === "id") {
@@ -182,7 +181,7 @@ const Profile = () => {
 
       {/* left and right */}
       <div className="flex justify-center gap-10">
-        {/* profile */}
+        {/* left - profile */}
         <div className="flex w-fit flex-col gap-10 rounded-lg bg-blue-50 p-10">
           {/* image */}
           <img
@@ -241,7 +240,7 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* division and completions */}
+        {/* right - division and completions */}
         <div className="flex w-[250px] flex-col gap-7">
           {/* division */}
           <div className="flex h-fit flex-col gap-3 rounded-lg bg-blue-50 p-10">
@@ -341,7 +340,7 @@ const Profile = () => {
               <Link
                 key={idx}
                 to={`/tasks/${item.id}`}
-                className="flex cursor-pointer items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
+                className="flex cursor-pointer items-center gap-3 rounded-xl p-3 shadow-sm hover:shadow-md"
               >
                 <CircleIcon
                   sx={{
@@ -360,50 +359,17 @@ const Profile = () => {
 
         {/* no task message box */}
         {paginatedTasks.length === 0 && (
-          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+          <div className="flex h-60 items-center justify-center rounded-xl text-gray-600">
             <p>There is no task</p>
           </div>
         )}
 
         {/* pagination buttons */}
-        <div className="flex items-center gap-3 self-end text-xs">
-          <p>
-            Page {totalPages === 0 ? 0 : currentPage} of {totalPages}
-          </p>
-
-          <div className="flex cursor-pointer items-center gap-1">
-            <div
-              onClick={() =>
-                setCurrentPage((prev) => {
-                  if (prev === 1) {
-                    return prev;
-                  }
-
-                  return prev - 1;
-                })
-              }
-            >
-              <ArrowCircleLeftIcon fontSize="large" className="text-blue-950" />
-            </div>
-
-            <div
-              onClick={() =>
-                setCurrentPage((prev) => {
-                  if (prev === totalPages) {
-                    return prev;
-                  }
-
-                  return prev + 1;
-                })
-              }
-            >
-              <ArrowCircleRightIcon
-                fontSize="large"
-                className="text-blue-950"
-              />
-            </div>
-          </div>
-        </div>
+        <PaginationButtons
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+        />
       </div>
 
       {/* completed projects */}
@@ -418,51 +384,17 @@ const Profile = () => {
 
         {/* no project message box */}
         {paginatedProjects.length === 0 && (
-          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+          <div className="flex h-60 items-center justify-center rounded-xl">
             <p>There is no project</p>
           </div>
         )}
 
         {/* pagination buttons */}
-        <div className="flex items-center gap-3 self-end text-xs">
-          <p>
-            Page {projectTotalPages === 0 ? 0 : projectCurrentPage} of{" "}
-            {projectTotalPages}
-          </p>
-
-          <div className="flex cursor-pointer items-center gap-1">
-            <div
-              onClick={() =>
-                setProjectCurrentPage((prev) => {
-                  if (prev === 1) {
-                    return prev;
-                  }
-
-                  return prev - 1;
-                })
-              }
-            >
-              <ArrowCircleLeftIcon fontSize="large" className="text-blue-950" />
-            </div>
-
-            <div
-              onClick={() =>
-                setProjectCurrentPage((prev) => {
-                  if (prev === projectTotalPages) {
-                    return prev;
-                  }
-
-                  return prev + 1;
-                })
-              }
-            >
-              <ArrowCircleRightIcon
-                fontSize="large"
-                className="text-blue-950"
-              />
-            </div>
-          </div>
-        </div>
+        <PaginationButtons
+          currentPage={projectCurrentPage}
+          setCurrentPage={setProjectCurrentPage}
+          totalPages={projectTotalPages}
+        />
       </div>
     </div>
   );
