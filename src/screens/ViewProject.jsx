@@ -33,8 +33,6 @@ const ViewProject = () => {
       createActivity(user.id, `deleted "${project.projectName}" project.`);
       return navigate("/");
     }
-
-    // TODO: last is here, continue to incorporate activity
   };
 
   useEffect(() => {

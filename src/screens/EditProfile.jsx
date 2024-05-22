@@ -1,5 +1,9 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { authActions } from "../store/authSlice";
+import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { uiActions } from "../store/uiSlice";
 import {
   validateConfirmPassword,
   validateContactNumber,
@@ -10,11 +14,6 @@ import {
   validatePassword,
   validateUsername,
 } from "../utils/validations";
-import { useDispatch, useSelector } from "react-redux";
-import { authActions } from "../store/authSlice";
-import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
-import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
-import { uiActions } from "../store/uiSlice";
 
 const EditProfile = () => {
   const user = useSelector((state) => state.auth.user);
@@ -40,7 +39,6 @@ const EditProfile = () => {
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmNewPasswordError, setConfirmNewPasswordError] = useState("");
 
-  const saveRef = useRef(null);
   const imageInputRef = useRef(null);
 
   const saveProfile = () => {
@@ -229,8 +227,6 @@ const EditProfile = () => {
     setConfirmNewPassword("");
   };
 
-  useEnterKeyPressEffect(saveRef);
-
   useEffect(() => {
     setUsers(
       localStorage.getItem("users")
@@ -355,7 +351,6 @@ const EditProfile = () => {
                       imageInputRef.current.value = "";
                     }}
                   >
-                    {/* TODO: continue register function */}
                     <CloseIcon className="text-red-600" />
                   </div>
                 </>
@@ -392,8 +387,7 @@ const EditProfile = () => {
         </div>
 
         <button
-          ref={saveRef}
-          className="my-5 rounded-md p-3  text-white"
+          className="my-5 rounded-md bg-blue-700 p-3 text-white"
           onClick={saveProfile}
         >
           Save Profile

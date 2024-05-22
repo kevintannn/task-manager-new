@@ -65,7 +65,7 @@ const ProjectsTable = ({ projects, fontsize }) => {
         <TableBody>
           {projects.map((item, idx) => (
             <TableRow
-              className="cursor-pointer hover:bg-gray-100"
+              className="cursor-pointer hover:bg-blue-50"
               key={idx}
               onClick={() => handleRowClick(item.id)}
             >
