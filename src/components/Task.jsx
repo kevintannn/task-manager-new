@@ -50,7 +50,7 @@ export const Task = ({ task, type = "action" }) => {
         <p className="font-semibold">{task.title}</p>
 
         {/* division */}
-        <div className="w-fit rounded-full border-2 border-blue-700 bg-blue-100">
+        <div className="w-fit rounded-full border border-blue-700 bg-blue-50">
           <p className="p-1 px-3 text-xs text-blue-700">
             {divisions.find((item) => item.id == task.division)?.name}
           </p>
@@ -60,11 +60,13 @@ export const Task = ({ task, type = "action" }) => {
       {/* right section */}
       <div className="flex flex-1 items-center justify-between">
         {/* user images */}
-        <div className="mb-2 flex w-[200px] items-center">
+        <div className="ml-2 flex w-[200px] items-center">
           {task.people.map((item, idx) => (
             <img
               key={idx}
-              src={users.find((item2) => item2.id == item)?.imgPath ?? avatarImg}
+              src={
+                users.find((item2) => item2.id == item)?.imgPath ?? avatarImg
+              }
               className={`${idx !== 0 ? "-ml-4" : ""} h-10 w-10 rounded-full border-[3px] border-white object-cover`}
             />
           ))}
@@ -90,7 +92,10 @@ export const Task = ({ task, type = "action" }) => {
 
             <div
               className="cursor-pointer rounded-md bg-red-600 hover:bg-red-700"
-              onClick={handleDeleteTask}
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteTask();
+              }}
             >
               <DeleteForeverIcon
                 className="p-1 text-white"
