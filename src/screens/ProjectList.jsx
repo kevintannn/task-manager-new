@@ -22,7 +22,7 @@ const ProjectList = () => {
             <div className="cursor-pointer">
               <MoreHorizIcon
                 fontSize="large"
-                className="text-blue-900 hover:text-blue-500"
+                className=""
               />
             </div>
           </div>
@@ -30,7 +30,7 @@ const ProjectList = () => {
 
         {/* projects */}
         {projects.length <= 0 ? (
-          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+          <div className="flex h-60 items-center justify-center rounded-xl">
             <p>There is no project</p>
           </div>
         ) : (
