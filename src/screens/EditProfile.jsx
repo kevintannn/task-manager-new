@@ -393,7 +393,7 @@ const EditProfile = () => {
 
         <button
           ref={saveRef}
-          className="my-5 rounded-md bg-blue-700 p-3  text-white"
+          className="my-5 rounded-md p-3  text-white"
           onClick={saveProfile}
         >
           Save Profile
