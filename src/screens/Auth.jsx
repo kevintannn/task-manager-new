@@ -124,13 +124,13 @@ const Auth = () => {
           {passwordError && <p className=" text-red-600">{passwordError}</p>}
         </div>
 
-        <Link className="text-right  font-bold text-blue-700 hover:underline">
+        <Link className="text-right  font-bold hover:underline">
           Forgot Password?
         </Link>
 
         <button
           ref={loginRef}
-          className="my-5 rounded-md bg-blue-700 p-3  text-white"
+          className="my-5 rounded-md p-3  text-white"
           onClick={handleLogin}
         >
           Login
@@ -140,7 +140,7 @@ const Auth = () => {
           Not registered yet?{" "}
           <Link
             to="/register"
-            className="font-bold text-blue-700 hover:underline"
+            className="font-bold hover:underline"
           >
             Create an account <ArrowOutwardIcon fontSize="small" />
           </Link>
