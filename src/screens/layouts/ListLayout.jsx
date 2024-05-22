@@ -9,14 +9,14 @@ const ListLayout = ({ children }) => {
       <div className="flex items-center gap-3">
         <Link
           to="/tasks"
-          className={`${pathname.startsWith("/tasks") ? "bg-blue-200" : "bg-blue-100"} flex w-40 items-center justify-center rounded-lg p-2 hover:bg-blue-200`}
+          className={`${pathname.startsWith("/tasks") ? "bg-blue-100" : "bg-blue-50 transition-all duration-150 hover:bg-blue-100"} flex w-40 items-center justify-center rounded-lg p-2`}
         >
           Tasks
         </Link>
 
         <Link
           to="/projects"
-          className={`${pathname.startsWith("/projects") ? "bg-blue-200" : "bg-blue-100"} flex w-40 items-center justify-center rounded-lg p-2 hover:bg-blue-200`}
+          className={`${pathname.startsWith("/projects") ? "bg-blue-100" : "bg-blue-50 transition-all duration-150 hover:bg-blue-100"} flex w-40 items-center justify-center rounded-lg p-2`}
         >
           Projects
         </Link>

@@ -136,7 +136,7 @@ const CreateProject = () => {
   }, []);
 
   return (
-    <div className="mt-5 flex flex-col gap-5">
+    <div className="mx-10 mt-5 flex flex-col gap-5">
       <h1 className="text-2xl font-bold">Create Project</h1>
 
       <div className="flex justify-center gap-10 rounded-xl bg-blue-50/50 p-10">

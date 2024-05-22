@@ -1,7 +1,7 @@
+import GitHubLogo from "../assets/github.png";
 import { Link, useLocation } from "react-router-dom";
 import MyLogo from "./MyLogo";
 import DashboardIcon from "@mui/icons-material/Dashboard";
-import OfflineBoltIcon from "@mui/icons-material/OfflineBolt";
 import StorageIcon from "@mui/icons-material/Storage";
 import PieChartIcon from "@mui/icons-material/PieChart";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
@@ -35,7 +35,7 @@ const Sidebar = () => {
             <Link
               key={idx}
               to={item.link}
-              className={`${pathname === item.link ? "shadow-md" : "bg-blue-100/80"} flex h-fit w-fit items-center justify-center rounded-lg p-3 duration-150 hover:bg-white hover:shadow-md`}
+              className={`${pathname === item.link ? "shadow-md" : "bg-blue-50"} flex h-fit w-fit items-center justify-center rounded-lg p-3 duration-150 hover:bg-white hover:shadow-md`}
             >
               {item.icon}
             </Link>
@@ -44,13 +44,19 @@ const Sidebar = () => {
       </div>
 
       {/* bolt link */}
-      <Link className="flex h-fit w-fit items-center justify-center rounded-lg bg-purple-900 p-3">
-        <OfflineBoltIcon
-          sx={{
-            color: "white",
+      <a
+        href="https://github.com/kevintannn/task-manager-new"
+        target="_blank"
+        className="flex h-fit w-fit items-center justify-center rounded-lg bg-purple-900 p-3"
+      >
+        <img
+          src={GitHubLogo}
+          className="h-6 w-6 object-cover"
+          style={{
+            filter: "invert(100%)",
           }}
         />
-      </Link>
+      </a>
     </div>
   );
 };

@@ -1,8 +1,5 @@
 // import "react-calendar/dist/Calendar.css";
-import AddCircleIcon from "@mui/icons-material/AddCircle";
 import AddIcon from "@mui/icons-material/Add";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 import "../calendar.css";
 import Card from "../components/Card";
 import TopBar from "../components/TopBar";
@@ -13,9 +10,9 @@ import { format } from "date-fns";
 import PrimaryButton from "../components/PrimaryButton";
 import { useSelector } from "react-redux";
 import ProjectsTable from "../components/ProjectsTable";
-import { Link } from "react-router-dom";
 import IconLabel from "../components/IconLabel";
 import { Modal } from "@mui/material";
+import PaginationButtons from "../components/PaginationButtons";
 
 const Dashboard = () => {
   const tasks = useSelector((state) => state.task.tasks);
@@ -26,6 +23,7 @@ const Dashboard = () => {
     new Date(new Date().toDateString()),
   );
   const [currentPage, setCurrentPage] = useState(1);
+  const [projectCurrentPage, setProjectCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -42,10 +40,24 @@ const Dashboard = () => {
     item.title.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const searchedProjects = projects.filter((item) =>
+    item.projectName.toLowerCase().includes(search.toLowerCase()),
+  );
+
   const pageSize = 6;
   const totalPages = Math.ceil(searchedTasks.length / pageSize);
   const startIdx = (currentPage - 1) * pageSize;
   const paginatedTasks = searchedTasks.slice(startIdx, startIdx + pageSize);
+
+  const projectPageSize = 10;
+  const projectTotalPages = Math.ceil(
+    searchedProjects.length / projectPageSize,
+  );
+  const projectStartIdx = (projectCurrentPage - 1) * projectPageSize;
+  const paginatedProjects = searchedProjects.slice(
+    projectStartIdx,
+    projectStartIdx + projectPageSize,
+  );
 
   const isToday = selectedDate.toDateString() === new Date().toDateString();
 
@@ -99,47 +111,11 @@ const Dashboard = () => {
             )}
 
             {/* pagination buttons */}
-            <div className="flex items-center gap-3 self-end text-xs">
-              <p>
-                Page {totalPages === 0 ? 0 : currentPage} of {totalPages}
-              </p>
-
-              <div className="flex cursor-pointer items-center gap-1">
-                <div
-                  onClick={() =>
-                    setCurrentPage((prev) => {
-                      if (prev === 1) {
-                        return prev;
-                      }
-
-                      return prev - 1;
-                    })
-                  }
-                >
-                  <ArrowCircleLeftIcon
-                    fontSize="large"
-                    className="text-blue-950"
-                  />
-                </div>
-
-                <div
-                  onClick={() =>
-                    setCurrentPage((prev) => {
-                      if (prev === totalPages) {
-                        return prev;
-                      }
-
-                      return prev + 1;
-                    })
-                  }
-                >
-                  <ArrowCircleRightIcon
-                    fontSize="large"
-                    className="text-blue-950"
-                  />
-                </div>
-              </div>
-            </div>
+            <PaginationButtons
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+            />
           </div>
 
           {/* left section two */}
@@ -153,24 +129,29 @@ const Dashboard = () => {
 
                 <IconLabel type="share" hoverable={true} />
 
-                <Link
-                  to="/projects/create"
-                  className="flex cursor-pointer items-center gap-1 rounded-lg bg-blue-950 p-1.5 px-2 text-white hover:bg-blue-900"
-                >
-                  <AddCircleIcon />
-
-                  <p className="mr-1">Create</p>
-                </Link>
+                <PrimaryButton href={"/projects/create"}>
+                  <AddIcon className="absolute -mt-0.5" fontSize="small" />
+                  <span className="ml-7 mr-1">Create</span>
+                </PrimaryButton>
               </div>
             </div>
 
             {/* table */}
             {projects.length <= 0 ? (
-              <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+              <div className="flex h-60 items-center justify-center rounded-xl text-gray-600">
                 <p>There is no project</p>
               </div>
             ) : (
-              <ProjectsTable projects={projects} />
+              <div className="flex flex-col gap-3">
+                <ProjectsTable projects={paginatedProjects} />
+
+                {/* pagination buttons */}
+                <PaginationButtons
+                  currentPage={projectCurrentPage}
+                  setCurrentPage={setProjectCurrentPage}
+                  totalPages={projectTotalPages}
+                />
+              </div>
             )}
           </div>
         </div>

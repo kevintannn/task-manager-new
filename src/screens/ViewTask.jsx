@@ -143,7 +143,7 @@ const ViewTask = () => {
           </div>
 
           {/* lower */}
-          <div className="rounded-lg bg-blue-50">
+          <div className="rounded-lg bg-blue-100">
             <p className="p-5 text-justify leading-6 tracking-wide">
               {task.description}
             </p>

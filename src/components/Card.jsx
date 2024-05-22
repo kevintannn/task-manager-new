@@ -8,41 +8,41 @@ import { getDuration } from "../utils";
 import { useEffect, useState } from "react";
 import { avatarImg } from "../constants";
 
-const types = {
-  high: "shadow-md hover:shadow-lg",
-  medium: "bg-red-100/80 hover:shadow-lg",
-  low: "bg-blue-50 hover:shadow-lg",
-};
-
-const iconColors = {
-  high: "darkslateblue",
-  medium: "brown",
-  low: "darkslateblue",
-};
-
-const iconBackgrounds = {
-  high: "bg-blue-100",
-  medium: "bg-red-200/80",
-  low: "bg-blue-200/80",
-};
-
 // const types = {
-//   high: "bg-blue-50 hover:shadow-lg",
-//   medium: "bg-blue-50 hover:shadow-lg",
+//   high: "shadow-md hover:shadow-lg",
+//   medium: "bg-red-100/80 hover:shadow-lg",
 //   low: "bg-blue-50 hover:shadow-lg",
 // };
 
 // const iconColors = {
 //   high: "darkslateblue",
-//   medium: "darkslateblue",
+//   medium: "brown",
 //   low: "darkslateblue",
 // };
 
 // const iconBackgrounds = {
-//   high: "bg-blue-200/80",
-//   medium: "bg-blue-200/80",
+//   high: "bg-blue-100",
+//   medium: "bg-red-200/80",
 //   low: "bg-blue-200/80",
 // };
+
+const types = {
+  high: "shadow-md hover:shadow-xl",
+  medium: "bg-blue-100 hover:shadow-xl",
+  low: "bg-yellow-100 hover:shadow-xl",
+};
+
+const iconColors = {
+  high: "",
+  medium: "",
+  low: "",
+};
+
+const iconBackgrounds = {
+  high: "bg-blue-100",
+  medium: "bg-blue-200",
+  low: "bg-yellow-300",
+};
 
 const Card = ({ task }) => {
   const [users, setUsers] = useState([]);

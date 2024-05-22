@@ -33,8 +33,6 @@ const ViewProject = () => {
       createActivity(user.id, `deleted "${project.projectName}" project.`);
       return navigate("/");
     }
-
-    // TODO: last is here, continue to incorporate activity
   };
 
   useEffect(() => {
@@ -123,7 +121,7 @@ const ViewProject = () => {
           </div>
 
           {/* lower */}
-          <div className="rounded-lg bg-blue-50">
+          <div className="rounded-lg bg-blue-100">
             <p className="p-5 text-justify leading-6 tracking-wide">
               {project.description}
             </p>
@@ -131,7 +129,7 @@ const ViewProject = () => {
         </div>
 
         {/* right section */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-3">
           <p className="text-sm font-bold">Team</p>
 
           <Box

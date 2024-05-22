@@ -177,7 +177,7 @@ const EditTask = () => {
     <div className="flex h-full flex-col justify-center gap-5">
       <h1 className="text-2xl font-bold">Edit Task</h1>
 
-      <div className="flex justify-center gap-5 rounded-xl bg-blue-50/50  p-10">
+      <div className="flex justify-center gap-5 rounded-xl  p-10">
         {/* left section */}
         <div className="flex w-[700px] flex-col gap-3">
           <div className="flex flex-col gap-1">

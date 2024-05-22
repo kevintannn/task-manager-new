@@ -11,6 +11,7 @@ import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckIcon from "@mui/icons-material/Check";
 import { createActivity } from "../utils";
+import TopBar from "../components/TopBar";
 
 const People = () => {
   const user = useSelector((state) => state.auth.user);
@@ -199,175 +200,183 @@ const People = () => {
   }, []);
 
   return (
-    <div className="mt-24 flex items-center justify-center">
-      {/* box */}
-      <div className="flex gap-5">
-        {/* left section */}
-        <div className="flex max-h-[500px] w-[500px] flex-col items-center gap-3">
-          <input
-            type="text"
-            placeholder="Search"
-            className="w-full rounded-lg border-2 p-3 px-5 outline-none"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+    <div className="flex flex-col">
+      {/* top bar */}
+      <TopBar mode="only_profile" />
 
+      {/* content */}
+      <div className="mt-16 flex items-center justify-center">
+        {/* box */}
+        <div className="flex gap-5">
+          {/* left section */}
+          <div className="flex max-h-[500px] w-[500px] flex-col items-center gap-3">
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full rounded-lg border-2 p-3 px-5 outline-none"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            <Box
+              component={Paper}
+              elevation={3}
+              className="flex w-full flex-col gap-3 overflow-y-auto p-5"
+              sx={{
+                borderRadius: "10px",
+              }}
+            >
+              {searchedUsers.length > 0 ? (
+                searchedUsers.map((item, idx) => (
+                  <Person key={idx} id={item.id} idx={idx} />
+                ))
+              ) : (
+                <p className="text-sm text-gray-600">
+                  No person is in this division
+                </p>
+              )}
+            </Box>
+          </div>
+
+          {/* right section */}
           <Box
             component={Paper}
             elevation={3}
-            className="flex w-full flex-col gap-3 overflow-y-auto p-5"
-            sx={{
-              borderRadius: "10px",
-            }}
+            className="h-fit max-h-[500px] w-[300px] overflow-y-auto"
+            sx={{ borderRadius: "10px" }}
           >
-            {searchedUsers.length > 0 ? (
-              searchedUsers.map((item, idx) => (
-                <Person key={idx} id={item.id} idx={idx} />
-              ))
-            ) : (
-              <p className="text-sm text-gray-600">
-                No person is in this division
-              </p>
-            )}
-          </Box>
-        </div>
+            <div className="flex flex-col gap-5 p-5">
+              {/* header */}
+              <h1 className="font-bold">Divisions</h1>
 
-        {/* right section */}
-        <Box
-          component={Paper}
-          elevation={3}
-          className="h-fit max-h-[500px] w-[300px] overflow-y-auto"
-          sx={{ borderRadius: "10px" }}
-        >
-          <div className="flex flex-col gap-5 p-5">
-            {/* header */}
-            <h1 className="font-bold">Divisions</h1>
+              {/* radios */}
+              <RadioGroup
+                value={divisionFilterId}
+                onChange={(e) => setDivisionFilterId(e.target.value)}
+              >
+                <FormControlLabel value="-1" control={<Radio />} label="All" />
 
-            {/* radios */}
-            <RadioGroup
-              value={divisionFilterId}
-              onChange={(e) => setDivisionFilterId(e.target.value)}
-            >
-              <FormControlLabel value="-1" control={<Radio />} label="All" />
+                {divisions.map((item, idx) => (
+                  <div className="" key={idx}>
+                    {/* radio label and buttons */}
+                    <div className="flex items-center justify-between">
+                      {/* radio label */}
+                      <FormControlLabel
+                        key={idx}
+                        label={item.name}
+                        value={item.id}
+                        control={<Radio />}
+                      />
 
-              {divisions.map((item, idx) => (
-                <div className="" key={idx}>
-                  {/* radio label and buttons */}
-                  <div className="flex items-center justify-between">
-                    {/* radio label */}
-                    <FormControlLabel
-                      key={idx}
-                      label={item.name}
-                      value={item.id}
-                      control={<Radio />}
-                    />
+                      {/* edit and delete button */}
+                      {editInputToggleIdx === null && (
+                        <div className="flex items-center gap-1">
+                          <div
+                            className="cursor-pointer rounded-sm bg-green-600 hover:bg-green-500"
+                            onClick={() => {
+                              setDivisionName("");
+                              setDivisionMode("add");
+                              setEditInputToggleIdx((prev) => {
+                                if (prev === idx) {
+                                  return null;
+                                }
 
-                    {/* edit and delete button */}
-                    {editInputToggleIdx === null && (
-                      <div className="flex items-center gap-1">
-                        <div
-                          className="cursor-pointer rounded-sm bg-green-600 hover:bg-green-500"
-                          onClick={() => {
-                            setDivisionName("");
-                            setDivisionMode("add");
-                            setEditInputToggleIdx((prev) => {
-                              if (prev === idx) {
-                                return null;
-                              }
+                                return idx;
+                              });
+                            }}
+                          >
+                            <ModeEditIcon className="p-1 text-white" />
+                          </div>
 
-                              return idx;
-                            });
-                          }}
-                        >
-                          <ModeEditIcon className="p-1 text-white" />
+                          <div
+                            className="cursor-pointer rounded-sm bg-red-700 hover:bg-red-600"
+                            onClick={() => deleteDivision(item.id)}
+                          >
+                            <DeleteForeverIcon className="p-1 text-white" />
+                          </div>
                         </div>
+                      )}
+                    </div>
 
-                        <div
-                          className="cursor-pointer rounded-sm bg-red-700 hover:bg-red-600"
-                          onClick={() => deleteDivision(item.id)}
-                        >
-                          <DeleteForeverIcon className="p-1 text-white" />
+                    {/* edit input and buttons */}
+                    {editInputToggleIdx === idx && (
+                      <div className="flex items-center gap-2">
+                        <input
+                          className="w-full rounded-lg border-2 p-2 text-sm outline-none"
+                          placeholder="New Division Name"
+                          value={divisionName}
+                          onChange={(e) => setDivisionName(e.target.value)}
+                        />
+
+                        <div className="flex items-center gap-1">
+                          <div
+                            className="cursor-pointer rounded-sm bg-green-600 hover:bg-green-500"
+                            onClick={() => editDivision(item.id)}
+                          >
+                            <CheckIcon className="p-1 text-white" />
+                          </div>
+
+                          <div
+                            className="cursor-pointer rounded-sm bg-red-700 hover:bg-red-600"
+                            onClick={() => setEditInputToggleIdx(null)}
+                          >
+                            <CancelIcon className="p-1 text-white" />
+                          </div>
                         </div>
                       </div>
                     )}
                   </div>
+                ))}
+              </RadioGroup>
 
-                  {/* edit input and buttons */}
-                  {editInputToggleIdx === idx && (
-                    <div className="flex items-center gap-2">
-                      <input
-                        className="w-full rounded-lg border-2 p-2 text-sm outline-none"
-                        placeholder="New Division Name"
-                        value={divisionName}
-                        onChange={(e) => setDivisionName(e.target.value)}
-                      />
+              {/* add division button */}
+              {divisionMode === "add" && (
+                <PrimaryButton
+                  cname={"justify-center"}
+                  handleClick={() => {
+                    setDivisionName("");
+                    setEditInputToggleIdx(null);
+                    setDivisionMode("save");
+                  }}
+                >
+                  Add Division
+                </PrimaryButton>
+              )}
 
-                      <div className="flex items-center gap-1">
-                        <div
-                          className="cursor-pointer rounded-sm bg-green-600 hover:bg-green-500"
-                          onClick={() => editDivision(item.id)}
-                        >
-                          <CheckIcon className="p-1 text-white" />
-                        </div>
+              {/* save and cancel button */}
+              {divisionMode === "save" && (
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={divisionNameInputRef}
+                    className="rounded-lg border-2 p-2 text-sm outline-none"
+                    placeholder="New Division Name"
+                    value={divisionName}
+                    onChange={(e) => setDivisionName(e.target.value)}
+                  />
 
-                        <div
-                          className="cursor-pointer rounded-sm bg-red-700 hover:bg-red-600"
-                          onClick={() => setEditInputToggleIdx(null)}
-                        >
-                          <CancelIcon className="p-1 text-white" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <PrimaryButton
+                      forwardedRef={saveRef}
+                      cname={"justify-center w-full"}
+                      handleClick={addDivision}
+                    >
+                      Save
+                    </PrimaryButton>
+
+                    <PrimaryButton
+                      cname={
+                        "justify-center w-full bg-red-700 hover:bg-red-600"
+                      }
+                      handleClick={() => setDivisionMode("add")}
+                    >
+                      Cancel
+                    </PrimaryButton>
+                  </div>
                 </div>
-              ))}
-            </RadioGroup>
-
-            {/* add division button */}
-            {divisionMode === "add" && (
-              <PrimaryButton
-                cname={"justify-center"}
-                handleClick={() => {
-                  setDivisionName("");
-                  setEditInputToggleIdx(null);
-                  setDivisionMode("save");
-                }}
-              >
-                Add Division
-              </PrimaryButton>
-            )}
-
-            {/* save and cancel button */}
-            {divisionMode === "save" && (
-              <div className="flex flex-col gap-2">
-                <input
-                  ref={divisionNameInputRef}
-                  className="rounded-lg border-2 p-2 text-sm outline-none"
-                  placeholder="New Division Name"
-                  value={divisionName}
-                  onChange={(e) => setDivisionName(e.target.value)}
-                />
-
-                <div className="flex items-center gap-2">
-                  <PrimaryButton
-                    forwardedRef={saveRef}
-                    cname={"justify-center w-full"}
-                    handleClick={addDivision}
-                  >
-                    Save
-                  </PrimaryButton>
-
-                  <PrimaryButton
-                    cname={"justify-center w-full bg-red-700 hover:bg-red-600"}
-                    handleClick={() => setDivisionMode("add")}
-                  >
-                    Cancel
-                  </PrimaryButton>
-                </div>
-              </div>
-            )}
-          </div>
-        </Box>
+              )}
+            </div>
+          </Box>
+        </div>
       </div>
     </div>
   );

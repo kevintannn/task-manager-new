@@ -33,7 +33,11 @@ const ProjectsTable = ({ projects, fontsize }) => {
   }, []);
 
   return (
-    <TableContainer>
+    <TableContainer
+      sx={{
+        borderRadius: "15px",
+      }}
+    >
       <Table
         sx={{
           "th, td": {
@@ -42,10 +46,9 @@ const ProjectsTable = ({ projects, fontsize }) => {
             fontSize: fontsize ?? "13px",
           },
           "tr th": {
-            backgroundColor: "#f9f7fc",
             fontWeight: "bold",
             color: "slategray",
-            borderRadius: "10px",
+            bgcolor: "rgb(219 234 254)",
           },
         }}
       >
@@ -62,7 +65,7 @@ const ProjectsTable = ({ projects, fontsize }) => {
         <TableBody>
           {projects.map((item, idx) => (
             <TableRow
-              className="cursor-pointer hover:bg-gray-100"
+              className="cursor-pointer hover:bg-blue-50"
               key={idx}
               onClick={() => handleRowClick(item.id)}
             >
@@ -83,7 +86,10 @@ const ProjectsTable = ({ projects, fontsize }) => {
                   {item.people.map((item2, idx) => (
                     <img
                       key={idx}
-                      src={users.find((item) => item.id == item2)?.imgPath ?? avatarImg}
+                      src={
+                        users.find((item) => item.id == item2)?.imgPath ??
+                        avatarImg
+                      }
                       className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
                     />
                   ))}

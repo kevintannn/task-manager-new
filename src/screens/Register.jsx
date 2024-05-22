@@ -277,7 +277,6 @@ const Register = () => {
                       imageInputRef.current.value = "";
                     }}
                   >
-                    {/* TODO: continue register function */}
                     <CloseIcon className="text-red-600" />
                   </div>
                 </>
@@ -357,7 +356,7 @@ const Register = () => {
 
         <button
           ref={registerRef}
-          className="my-5 rounded-md bg-blue-700 p-3  text-white"
+          className="my-5 rounded-md bg-blue-700 p-3 text-white"
           onClick={handleRegister}
         >
           Register
