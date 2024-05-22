@@ -6,7 +6,12 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-const TopBar = ({ search, setSearch, mode = "default" }) => {
+const TopBar = ({
+  placeholder = "Search for task or project",
+  search,
+  setSearch,
+  mode = "default",
+}) => {
   const user = useSelector((state) => state.auth.user);
 
   return (
@@ -25,7 +30,7 @@ const TopBar = ({ search, setSearch, mode = "default" }) => {
 
           <input
             className="w-96 rounded-md bg-blue-50 p-2 pl-10 outline-none"
-            placeholder="Search for task or project"
+            placeholder={placeholder}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -42,7 +47,7 @@ const TopBar = ({ search, setSearch, mode = "default" }) => {
         {/* profile */}
         <Link
           to={"/profile"}
-          className="group flex h-12 cursor-pointer items-center justify-center gap-3 bg-gray-50 "
+          className="group flex h-12 cursor-pointer items-center justify-center gap-3 bg-blue-50/50"
         >
           <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
             {user.imgPath ? (
@@ -60,7 +65,7 @@ const TopBar = ({ search, setSearch, mode = "default" }) => {
             <p className="text-xs text-gray-500">Admin</p>
           </div>
 
-          <div className="flex h-full w-3 items-center justify-center rounded-[3px] bg-blue-900">
+          <div className="flex h-full w-3 items-center justify-center rounded-[3px] bg-blue-950">
             <MoreVertIcon
               sx={{
                 color: "white",
