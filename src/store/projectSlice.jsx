@@ -13,6 +13,16 @@ const projectSlice = createSlice({
     addProject(state, action) {
       state.projects.push(action.payload);
     },
+
+    modifyProject(state, action) {
+      state.projects = state.projects.map((item) => {
+        if (item.id == action.payload.id) {
+          return { ...item, ...action.payload.properties };
+        }
+
+        return item;
+      });
+    },
   },
 });
 
