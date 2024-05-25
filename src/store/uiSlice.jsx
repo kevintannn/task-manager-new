@@ -8,6 +8,7 @@ const uiSlice = createSlice({
       message: "",
       open: false,
     },
+    loading: true,
   },
   reducers: {
     setNotification(state, action) {
@@ -16,6 +17,10 @@ const uiSlice = createSlice({
 
     closeNotification(state) {
       state.notification.open = false;
+    },
+
+    setLoading(state, action) {
+      state.loading = action.payload;
     },
   },
 });
