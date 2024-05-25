@@ -13,6 +13,8 @@ import ProjectsTable from "../components/ProjectsTable";
 import IconLabel from "../components/IconLabel";
 import { Modal } from "@mui/material";
 import PaginationButtons from "../components/PaginationButtons";
+import { getDatasFromAxios } from "../utils";
+import Loading from "../components/Loading";
 
 const Dashboard = () => {
   const tasks = useSelector((state) => state.task.tasks);
@@ -26,8 +28,9 @@ const Dashboard = () => {
   const [projectCurrentPage, setProjectCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const filteredTasks = tasks.filter((item) => {
+  const filteredTasks = tasks?.filter((item) => {
     const startDate = new Date(new Date(item.startDateTime).toDateString()); // the purpose of nesting new Date() is to set the hours to 00:00:00 so we only compare date
     const endDate = new Date(new Date(item.endDateTime).toDateString());
 
@@ -36,7 +39,7 @@ const Dashboard = () => {
     }
   });
 
-  const searchedTasks = filteredTasks.filter((item) =>
+  const searchedTasks = filteredTasks?.filter((item) =>
     item.title.toLowerCase().includes(search.toLowerCase()),
   );
 
@@ -45,9 +48,9 @@ const Dashboard = () => {
   );
 
   const pageSize = 6;
-  const totalPages = Math.ceil(searchedTasks.length / pageSize);
+  const totalPages = Math.ceil(searchedTasks?.length / pageSize);
   const startIdx = (currentPage - 1) * pageSize;
-  const paginatedTasks = searchedTasks.slice(startIdx, startIdx + pageSize);
+  const paginatedTasks = searchedTasks?.slice(startIdx, startIdx + pageSize);
 
   const projectPageSize = 10;
   const projectTotalPages = Math.ceil(
@@ -62,16 +65,17 @@ const Dashboard = () => {
   const isToday = selectedDate.toDateString() === new Date().toDateString();
 
   useEffect(() => {
-    setActivities(
-      localStorage.getItem("activities")
-        ? JSON.parse(localStorage.getItem("activities")).sort(
-            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
-          )
-        : [],
-    );
+    setLoading(true);
+
+    const getActivities = async () => {
+      setActivities(await getDatasFromAxios("activities"));
+    };
+    getActivities().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="flex flex-col">
       <TopBar search={search} setSearch={setSearch} />
 
@@ -96,26 +100,28 @@ const Dashboard = () => {
             </div>
 
             {/* cards */}
-            {searchedTasks.length > 0 && (
-              <div className="grid grid-cols-3 gap-4">
-                {paginatedTasks.map((item, idx) => (
-                  <Card key={idx} task={item} />
-                ))}
+            {searchedTasks?.length > 0 && (
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-3 gap-4">
+                  {paginatedTasks?.map((item, idx) => (
+                    <Card key={idx} task={item} />
+                  ))}
+                </div>
+
+                {/* pagination buttons */}
+                <PaginationButtons
+                  currentPage={currentPage}
+                  setCurrentPage={setCurrentPage}
+                  totalPages={totalPages}
+                />
               </div>
             )}
 
-            {searchedTasks.length === 0 && (
+            {searchedTasks?.length <= 0 && (
               <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
                 <p>There is no task</p>
               </div>
             )}
-
-            {/* pagination buttons */}
-            <PaginationButtons
-              currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
-              totalPages={totalPages}
-            />
           </div>
 
           {/* left section two */}
@@ -138,7 +144,7 @@ const Dashboard = () => {
 
             {/* table */}
             {projects.length <= 0 ? (
-              <div className="flex h-60 items-center justify-center rounded-xl text-gray-600">
+              <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
                 <p>There is no project</p>
               </div>
             ) : (
@@ -161,7 +167,9 @@ const Dashboard = () => {
           <Calendar onChange={(e) => setSelectedDate(new Date(e))} />
 
           <ActivityBox
-            activities={activities}
+            activities={activities.sort(
+              (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+            )}
             limit={6}
             showModal={() => setModalVisible(true)}
           />
@@ -173,7 +181,9 @@ const Dashboard = () => {
         <div className="flex h-full w-full items-center justify-center">
           <ActivityBox
             cname={"bg-white max-h-[600px] overflow-y-auto"}
-            activities={activities}
+            activities={activities.sort(
+              (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
+            )}
             closeModal={() => setModalVisible(false)}
           />
         </div>
