@@ -23,6 +23,12 @@ const projectSlice = createSlice({
         return item;
       });
     },
+
+    deleteProject(state, action) {
+      state.projects = state.projects.filter(
+        (item) => item.id != action.payload,
+      );
+    },
   },
 });
 
