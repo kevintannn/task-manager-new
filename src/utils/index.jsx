@@ -1,4 +1,6 @@
+import axios from "axios";
 import { format } from "date-fns";
+import { firebaseRealtimeDatabaseURL } from "../constants";
 
 export const getDuration = (startDateTime, endDateTime) => {
   if (format(startDateTime, "dmy") === format(endDateTime, "dmy")) {
@@ -22,22 +24,48 @@ export const stringSort = (array, order) => {
   }
 };
 
-export const createActivity = (person, activity) => {
-  const existingActivitiesJSON = localStorage.getItem("activities");
-  const existingActivities = existingActivitiesJSON
-    ? JSON.parse(existingActivitiesJSON)
-    : [];
+export const createActivity = async (person, activity) => {
+  await axios
+    .post(`${firebaseRealtimeDatabaseURL}/activities.json`, {
+      person,
+      activity,
+      updatedAt: new Date(),
+    })
+    .then((res) => console.log(res))
+    .catch((err) => console.log(err));
 
-  const newId = existingActivities?.[existingActivities.length - 1]?.id
-    ? parseInt(existingActivities?.[existingActivities.length - 1]?.id) + 1
-    : 1;
+  // const existingActivitiesJSON = localStorage.getItem("activities");
+  // const existingActivities = existingActivitiesJSON
+  //   ? JSON.parse(existingActivitiesJSON)
+  //   : [];
 
-  existingActivities.push({
-    id: newId,
-    person,
-    activity,
-    updatedAt: new Date(),
-  });
+  // const newId = existingActivities?.[existingActivities.length - 1]?.id
+  //   ? parseInt(existingActivities?.[existingActivities.length - 1]?.id) + 1
+  //   : 1;
 
-  localStorage.setItem("activities", JSON.stringify(existingActivities));
+  // existingActivities.push({
+  //   id: newId,
+  //   person,
+  //   activity,
+  //   updatedAt: new Date(),
+  // });
+
+  // localStorage.setItem("activities", JSON.stringify(existingActivities));
+};
+
+export const getDatasFromAxios = async (dataName) => {
+  let data = [];
+
+  await axios
+    .get(`${firebaseRealtimeDatabaseURL}/${dataName}.json`)
+    .then((res) => {
+      if (res.data) {
+        data = Object.keys(res.data).map((item) => {
+          return { id: item, ...res.data[item] };
+        });
+      }
+    })
+    .catch((err) => console.log(err));
+
+  return data;
 };

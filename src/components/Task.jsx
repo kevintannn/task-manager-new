@@ -3,17 +3,19 @@ import CallMissedOutgoingIcon from "@mui/icons-material/CallMissedOutgoing";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import { useDispatch } from "react-redux";
-import { getDuration } from "../utils";
+import { getDatasFromAxios, getDuration } from "../utils";
 import { deleteTask } from "../store/taskActions";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { avatarImg } from "../constants";
+import Loading from "./Loading";
 
 export const Task = ({ task, type = "action" }) => {
   const dispatch = useDispatch();
 
   const [users, setUsers] = useState([]);
   const [divisions, setDivisions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const startDateTime = new Date(task.startDateTime);
   const endDateTime = new Date(task.endDateTime);
@@ -29,20 +31,18 @@ export const Task = ({ task, type = "action" }) => {
   };
 
   useEffect(() => {
-    setDivisions(
-      localStorage.getItem("divisions")
-        ? JSON.parse(localStorage.getItem("divisions"))
-        : [],
-    );
+    setLoading(true);
 
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const fetchData = async () => {
+      setDivisions(await getDatasFromAxios("divisions"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading type={"spinner_only"} />
+  ) : (
     <div className="flex w-full items-center">
       {/* left section */}
       <div className="flex w-[400px] flex-col gap-1">
@@ -52,7 +52,7 @@ export const Task = ({ task, type = "action" }) => {
         {/* division */}
         <div className="w-fit rounded-full border border-blue-700 bg-blue-50">
           <p className="p-1 px-3 text-xs text-blue-700">
-            {divisions.find((item) => item.id == task.division)?.name}
+            {divisions?.find((item) => item.id == task.division)?.name}
           </p>
         </div>
       </div>
@@ -65,7 +65,7 @@ export const Task = ({ task, type = "action" }) => {
             <img
               key={idx}
               src={
-                users.find((item2) => item2.id == item)?.imgPath ?? avatarImg
+                users?.find((item2) => item2.id == item)?.imgPath ?? avatarImg
               }
               className={`${idx !== 0 ? "-ml-4" : ""} h-10 w-10 rounded-full border-[3px] border-white object-cover`}
             />

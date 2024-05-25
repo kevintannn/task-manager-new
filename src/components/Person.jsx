@@ -3,57 +3,74 @@ import CallMissedOutgoingIcon from "@mui/icons-material/CallMissedOutgoing";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { avatarImg } from "../constants";
+import { avatarImg, firebaseRealtimeDatabaseURL } from "../constants";
+import { getDatasFromAxios } from "../utils";
+import axios from "axios";
+import Loading from "./Loading";
 
-const Person = ({ id, type, idx }) => {
+const Person = ({ person, id, type, idx }) => {
   const user = useSelector((state) => state.auth.user);
 
-  const [users, setUsers] = useState([]);
+  const [statePerson, setStatePerson] = useState(person);
   const [divisions, setDivisions] = useState([]);
-
-  const person = users.find((item) => item.id == id);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
   const handleClick = () => {
-    if (user.id == person?.id) {
+    if (user.id == statePerson?.id) {
       return navigate("/profile");
     }
 
-    return navigate(`/profile/${id}`);
+    return navigate(`/profile/${statePerson?.id}`);
   };
 
   useEffect(() => {
-    setDivisions(
-      localStorage.getItem("divisions")
-        ? JSON.parse(localStorage.getItem("divisions"))
-        : [],
-    );
-  }, []);
+    setLoading(true);
+
+    if (!person && id) {
+      axios
+        .get(`${firebaseRealtimeDatabaseURL}/users/${id}.json`)
+        .then((res) => {
+          if (res.data) {
+            setStatePerson({ id: id, ...res.data });
+            setLoading(false);
+          }
+        })
+        .catch((err) => console.log(err));
+    }
+  }, [id, person]);
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setStatePerson(person);
+  }, [person]);
+
+  useEffect(() => {
+    setLoading(true);
+
+    const getDivisions = async () => {
+      setDivisions(await getDatasFromAxios("divisions"));
+    };
+    getDivisions().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading type="spinner_only" />
+  ) : (
     <div
       className="flex cursor-pointer items-center gap-5 p-1 duration-100 hover:rounded-full hover:bg-blue-100"
       onClick={handleClick}
     >
       <img
-        src={person?.imgPath ?? avatarImg}
+        src={statePerson?.imgPath ?? avatarImg}
         className="h-10 w-10 rounded-full object-cover"
       />
 
       <div className="flex w-full items-center justify-between">
         <div className="flex flex-col">
-          <p className="text-sm font-bold">{person?.name}</p>
+          <p className="text-sm font-bold">{statePerson?.name}</p>
           <p className="text-xs text-gray-600">
-            {divisions.find((item) => item.id == person?.divisionId)?.name}{" "}
+            {divisions.find((item) => item.id == statePerson?.divisionId)?.name}{" "}
             {type === "creator_label" && idx === 0 && "• Creator"}
           </p>
         </div>

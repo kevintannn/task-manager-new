@@ -4,13 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Box, Paper } from "@mui/material";
 import { format } from "date-fns";
 import PrimaryButton from "../components/PrimaryButton";
-import { projectTypes } from "../data";
 import Person from "../components/Person";
 import IconLabel from "../components/IconLabel";
 import { useEffect, useState } from "react";
 import { uiActions } from "../store/uiSlice";
 import { deleteProject } from "../store/projectActions";
-import { createActivity } from "../utils";
+import { createActivity, getDatasFromAxios } from "../utils";
+import Loading from "../components/Loading";
 
 const ViewProject = () => {
   const { id } = useParams();
@@ -21,22 +21,29 @@ const ViewProject = () => {
   const dispatch = useDispatch();
 
   const [users, setUsers] = useState([]);
+  const [projectTypes, setProjectTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
-  const handleDeleteProject = () => {
+  const handleDeleteProject = async () => {
     if (!confirm("Confirm delete project? (can not be undone)")) {
       return;
     }
 
-    if (dispatch(deleteProject(id))) {
-      createActivity(user.id, `deleted "${project.projectName}" project.`);
+    setLoading(true);
+
+    if (await dispatch(deleteProject(id))) {
+      await createActivity(
+        user.id,
+        `deleted "${project.projectName}" project.`,
+      );
       return navigate("/");
     }
   };
 
   useEffect(() => {
-    if (!project) {
+    if (!project && !loading) {
       dispatch(
         uiActions.setNotification({
           type: "error",
@@ -47,17 +54,21 @@ const ViewProject = () => {
 
       return navigate("/");
     }
-  }, [project, navigate, dispatch]);
+  }, [project, navigate, dispatch, loading]);
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
+
+    const fetchData = async () => {
+      setProjectTypes(await getDatasFromAxios("projectTypes"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     project && (
       <div className="my-20 flex justify-center gap-20">
         {/* left section */}

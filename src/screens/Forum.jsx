@@ -1,7 +1,7 @@
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import PrimaryButton from "../components/PrimaryButton";
-import { avatarImg } from "../constants";
+import { avatarImg, firebaseRealtimeDatabaseURL } from "../constants";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
@@ -10,8 +10,10 @@ import CloseIcon from "@mui/icons-material/Close";
 import { validateTitle } from "../utils/validations";
 import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../store/uiSlice";
-import { createActivity } from "../utils";
+import { createActivity, getDatasFromAxios } from "../utils";
 import TopBar from "../components/TopBar";
+import axios from "axios";
+import Loading from "../components/Loading";
 
 const Forum = () => {
   const user = useSelector((state) => state.auth.user);
@@ -24,6 +26,7 @@ const Forum = () => {
   const [titleError, setTitleError] = useState("");
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -31,67 +34,120 @@ const Forum = () => {
     item.title.toLowerCase().includes(search.toLowerCase()),
   );
 
-  const createDiscussion = () => {
+  const createDiscussion = async () => {
     if (title === "") {
       setTitleError("Title can not be empty!");
       return;
     }
 
-    const existingDiscussionsJSON = localStorage.getItem("discussions");
-    const existingDiscussions = existingDiscussionsJSON
-      ? JSON.parse(existingDiscussionsJSON)
-      : [];
-
-    const newId = existingDiscussions?.[existingDiscussions.length - 1]
-      ? parseInt(existingDiscussions?.[existingDiscussions.length - 1]?.id) + 1
-      : 1;
-    existingDiscussions.push({
-      id: newId,
+    // firebase
+    const newDiscussion = {
       title,
       content,
-      upvotes: [],
-      replies: [],
+      upvotes: {},
+      replies: {},
       createdBy: user.id,
       createdAt: new Date(),
-    });
+    };
 
-    localStorage.setItem("discussions", JSON.stringify(existingDiscussions));
+    await axios
+      .post(`${firebaseRealtimeDatabaseURL}/discussions.json`, newDiscussion)
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "New discussion created!",
+              open: true,
+            }),
+          );
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "New discussion created!",
-        open: true,
-      }),
-    );
+          await createActivity(user.id, `created a new forum discussion.`);
 
-    createActivity(user.id, `created a new forum discussion.`);
+          setModalVisible(false);
+          setTitle("");
+          setContent("");
 
-    setModalVisible(false);
-    setTitle("");
-    setContent("");
+          return navigate(0);
+        }
+      })
+      .catch((err) => console.log(err));
 
-    return navigate(0);
+    // local storage
+    // const existingDiscussionsJSON = localStorage.getItem("discussions");
+    // const existingDiscussions = existingDiscussionsJSON
+    //   ? JSON.parse(existingDiscussionsJSON)
+    //   : [];
+
+    // const newId = existingDiscussions?.[existingDiscussions.length - 1]
+    //   ? parseInt(existingDiscussions?.[existingDiscussions.length - 1]?.id) + 1
+    //   : 1;
+    // existingDiscussions.push({
+    //   id: newId,
+    //   title,
+    //   content,
+    //   upvotes: [],
+    //   replies: [],
+    //   createdBy: user.id,
+    //   createdAt: new Date(),
+    // });
+
+    // localStorage.setItem("discussions", JSON.stringify(existingDiscussions));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "New discussion created!",
+    //     open: true,
+    //   }),
+    // );
+
+    // createActivity(user.id, `created a new forum discussion.`);
+
+    // setModalVisible(false);
+    // setTitle("");
+    // setContent("");
+
+    // return navigate(0);
   };
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
 
-    setDiscussions(
-      localStorage.getItem("discussions")
-        ? JSON.parse(localStorage.getItem("discussions")).sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-          )
-        : [],
-    );
+    const fetchData = async () => {
+      // fetch discussions
+      let data = await getDatasFromAxios("discussions");
+
+      data = data.map((item) => {
+        if (!item.upvotes) {
+          item.upvotes = [];
+        }
+
+        if (!item.replies) {
+          item.replies = [];
+        } else {
+          item.replies = Object.keys(item.replies).map((item2) => {
+            return { id: item2, ...item.replies[item2] };
+          });
+        }
+
+        return item;
+      });
+
+      setDiscussions(
+        data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+      );
+
+      // fetch users
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
-    <div className="flex flex-col gap-5">
+  return loading ? (
+    <Loading />
+  ) : (
+    <div className="mx-10 flex flex-col gap-5">
       {/* top bar */}
       <TopBar
         placeholder="Search for question"
@@ -165,12 +221,12 @@ const Forum = () => {
                         fontSize: "27px",
                       }}
                     />
-                    <p className="-mt-1">{item.upvotes.length}</p>
+                    <p className="-mt-1">{item.upvotes?.length ?? 0}</p>
                   </div>
 
                   <div className="flex items-center gap-2">
                     <ChatBubbleOutlineIcon />
-                    <p className="-mt-1">{item.replies.length}</p>
+                    <p className="-mt-1">{item.replies?.length ?? 0}</p>
                   </div>
                 </div>
               </Link>

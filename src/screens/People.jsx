@@ -10,8 +10,12 @@ import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
 import ModeEditIcon from "@mui/icons-material/ModeEdit";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckIcon from "@mui/icons-material/Check";
-import { createActivity } from "../utils";
+import { createActivity, getDatasFromAxios } from "../utils";
 import TopBar from "../components/TopBar";
+import axios from "axios";
+import { firebaseRealtimeDatabaseURL } from "../constants";
+import { useNavigate } from "react-router-dom";
+import Loading from "../components/Loading";
 
 const People = () => {
   const user = useSelector((state) => state.auth.user);
@@ -25,9 +29,12 @@ const People = () => {
   const [divisionName, setDivisionName] = useState("");
   const [divisionChangedSwitch, setDivisionChangedSwitch] = useState(false);
   const [editInputToggleIdx, setEditInputToggleIdx] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const saveRef = useRef();
   const divisionNameInputRef = useRef();
+
+  const navigate = useNavigate();
 
   const filteredUsers = users.filter((item) => {
     if (divisionFilterId === "-1") {
@@ -49,141 +56,255 @@ const People = () => {
     }
   });
 
-  const addDivision = () => {
+  const addDivision = async () => {
     if (divisionName.length < 2) {
       return alert("Division name is too short (min. 2 characters)");
     }
 
-    const existingDivisionsJSON = localStorage.getItem("divisions");
-    const existingDivisions = existingDivisionsJSON
-      ? JSON.parse(existingDivisionsJSON)
-      : [];
-
-    const newDivisionId =
-      existingDivisions.length > 0
-        ? parseInt(existingDivisions[existingDivisions.length - 1].id) + 1
-        : 1;
-
-    existingDivisions.push({
-      id: newDivisionId,
+    // firebase
+    const newDivision = {
       name: divisionName,
       slug: slugify(divisionName, {
         lower: true,
         strict: true,
       }),
-    });
+    };
 
-    localStorage.setItem("divisions", JSON.stringify(existingDivisions));
+    await axios
+      .post(`${firebaseRealtimeDatabaseURL}/divisions.json`, newDivision)
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "New division added!",
+              open: true,
+            }),
+          );
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "New division added!",
-        open: true,
-      }),
-    );
+          setDivisionName("");
+          setDivisionMode("add");
 
-    setDivisionName("");
-    setDivisionMode("add");
+          setDivisionChangedSwitch(!divisionChangedSwitch);
 
-    setDivisionChangedSwitch(!divisionChangedSwitch);
+          await createActivity(
+            user.id,
+            `added a new division "${divisionName}".`,
+          );
+        }
+      })
+      .catch((err) => console.log(err));
 
-    createActivity(user.id, `added a new division "${divisionName}".`);
+    // local storage
+    // const existingDivisionsJSON = localStorage.getItem("divisions");
+    // const existingDivisions = existingDivisionsJSON
+    //   ? JSON.parse(existingDivisionsJSON)
+    //   : [];
+
+    // const newDivisionId =
+    //   existingDivisions.length > 0
+    //     ? parseInt(existingDivisions[existingDivisions.length - 1].id) + 1
+    //     : 1;
+
+    // existingDivisions.push({
+    //   id: newDivisionId,
+    //   name: divisionName,
+    //   slug: slugify(divisionName, {
+    //     lower: true,
+    //     strict: true,
+    //   }),
+    // });
+
+    // localStorage.setItem("divisions", JSON.stringify(existingDivisions));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "New division added!",
+    //     open: true,
+    //   }),
+    // );
+
+    // setDivisionName("");
+    // setDivisionMode("add");
+
+    // setDivisionChangedSwitch(!divisionChangedSwitch);
+
+    // createActivity(user.id, `added a new division "${divisionName}".`);
   };
 
-  const deleteDivision = (divisionId) => {
+  const deleteDivision = async (divisionId) => {
     if (!confirm("Confirm delete this division? (can not be undone)")) {
       return;
     }
 
+    // firebase
     // check if there is user in this division
-    const existUserInDivision = users.find(
-      (item) => item.divisionId == divisionId,
-    );
-    if (existUserInDivision) {
-      return alert(
-        "Can not delete this division because there are users in this division!",
-      );
-    }
+    await axios
+      .get(
+        `${firebaseRealtimeDatabaseURL}/users.json?orderBy="divisionId"&equalTo="${divisionId}"`,
+      )
+      .then(async (res) => {
+        if (Object.keys(res.data).length > 0) {
+          dispatch(
+            uiActions.setNotification({
+              type: "error",
+              message:
+                "Can not delete because there are users in this division!",
+              open: true,
+            }),
+          );
+        } else {
+          await axios
+            .delete(
+              `${firebaseRealtimeDatabaseURL}/divisions/${divisionId}.json`,
+            )
+            .then(async (res) => {
+              if (res.status === 200) {
+                dispatch(
+                  uiActions.setNotification({
+                    type: "success",
+                    message: "Division deleted!",
+                    open: true,
+                  }),
+                );
 
-    const existingDivisionsJSON = localStorage.getItem("divisions");
-    const existingDivisions = existingDivisionsJSON
-      ? JSON.parse(existingDivisionsJSON).filter(
-          (item) => item.id != divisionId,
-        )
-      : [];
+                setDivisionChangedSwitch(!divisionChangedSwitch);
 
-    localStorage.setItem("divisions", JSON.stringify(existingDivisions));
+                await createActivity(
+                  user.id,
+                  `deleted division named "${divisions.find((item) => item.id == divisionId).name}".`,
+                );
+              }
+            })
+            .catch((err) => console.log(err));
+        }
+      })
+      .catch((err) => console.log(err));
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Division deleted!",
-        open: true,
-      }),
-    );
+    return;
 
-    setDivisionChangedSwitch(!divisionChangedSwitch);
+    // local storage
+    // // check if there is user in this division
+    // const existUserInDivision = users?.find(
+    //   (item) => item.divisionId == divisionId,
+    // );
+    // if (existUserInDivision) {
+    //   return alert(
+    //     "Can not delete this division because there are users in this division!",
+    //   );
+    // }
 
-    createActivity(
-      user.id,
-      `deleted division named "${divisions.find((item) => item.id == divisionId).name}".`,
-    );
+    // const existingDivisionsJSON = localStorage.getItem("divisions");
+    // const existingDivisions = existingDivisionsJSON
+    //   ? JSON.parse(existingDivisionsJSON).filter(
+    //       (item) => item.id != divisionId,
+    //     )
+    //   : [];
+
+    // localStorage.setItem("divisions", JSON.stringify(existingDivisions));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Division deleted!",
+    //     open: true,
+    //   }),
+    // );
+
+    // setDivisionChangedSwitch(!divisionChangedSwitch);
+
+    // createActivity(
+    //   user.id,
+    //   `deleted division named "${divisions.find((item) => item.id == divisionId).name}".`,
+    // );
   };
 
-  const editDivision = (divisionId) => {
+  const editDivision = async (divisionId) => {
     if (divisionName.length < 2) {
       return alert("Division name is too short (min. 2 characters)");
     }
 
-    const existingDivisionsJSON = localStorage.getItem("divisions");
-    const existingDivisions = existingDivisionsJSON
-      ? JSON.parse(existingDivisionsJSON).map((item) => {
-          if (item.id == divisionId) {
-            return {
-              ...item,
-              name: divisionName,
-              slug: slugify(divisionName, {
-                lower: true,
-                strict: true,
-              }),
-            };
-          }
-
-          return item;
-        })
-      : [];
-
-    localStorage.setItem("divisions", JSON.stringify(existingDivisions));
-
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Division saved!",
-        open: true,
+    // firebase
+    const updatedDivision = {
+      name: divisionName,
+      slug: slugify(divisionName, {
+        lower: true,
+        strict: true,
       }),
-    );
+    };
 
-    setDivisionName("");
-    setEditInputToggleIdx(null);
+    await axios
+      .patch(
+        `${firebaseRealtimeDatabaseURL}/divisions/${divisionId}.json`,
+        updatedDivision,
+      )
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Division saved!",
+              open: true,
+            }),
+          );
 
-    setDivisionChangedSwitch(!divisionChangedSwitch);
+          setDivisionName("");
+          setEditInputToggleIdx(null);
 
-    createActivity(
-      user.id,
-      `changed division name from "${divisions.find((item) => item.id == divisionId).name}" to "${divisionName}".`,
-    );
+          setDivisionChangedSwitch(!divisionChangedSwitch);
+
+          await createActivity(
+            user.id,
+            `changed division name from "${divisions.find((item) => item.id == divisionId).name}" to "${divisionName}".`,
+          );
+
+          return navigate(0);
+        }
+      })
+      .catch((err) => console.log(err));
+
+    // local storage
+    // const existingDivisionsJSON = localStorage.getItem("divisions");
+    // const existingDivisions = existingDivisionsJSON
+    //   ? JSON.parse(existingDivisionsJSON).map((item) => {
+    //       if (item.id == divisionId) {
+    //         return {
+    //           ...item,
+    //           name: divisionName,
+    //           slug: slugify(divisionName, {
+    //             lower: true,
+    //             strict: true,
+    //           }),
+    //         };
+    //       }
+
+    //       return item;
+    //     })
+    //   : [];
+
+    // localStorage.setItem("divisions", JSON.stringify(existingDivisions));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Division saved!",
+    //     open: true,
+    //   }),
+    // );
+
+    // setDivisionName("");
+    // setEditInputToggleIdx(null);
+
+    // setDivisionChangedSwitch(!divisionChangedSwitch);
+
+    // createActivity(
+    //   user.id,
+    //   `changed division name from "${divisions.find((item) => item.id == divisionId).name}" to "${divisionName}".`,
+    // );
   };
 
   useEnterKeyPressEffect(saveRef);
-
-  useEffect(() => {
-    setDivisions(
-      localStorage.getItem("divisions")
-        ? JSON.parse(localStorage.getItem("divisions"))
-        : [],
-    );
-  }, [divisionChangedSwitch]);
 
   useEffect(() => {
     if (divisionMode === "save") {
@@ -192,14 +313,18 @@ const People = () => {
   }, [divisionMode]);
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
+
+    const fetchData = async () => {
+      setDivisions(await getDatasFromAxios("divisions"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="flex flex-col">
       {/* top bar */}
       <TopBar mode="only_profile" />
@@ -228,7 +353,7 @@ const People = () => {
             >
               {searchedUsers.length > 0 ? (
                 searchedUsers.map((item, idx) => (
-                  <Person key={idx} id={item.id} idx={idx} />
+                  <Person key={idx} person={item} idx={idx} />
                 ))
               ) : (
                 <p className="text-sm text-gray-600">

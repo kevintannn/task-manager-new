@@ -4,16 +4,16 @@ import { formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import { avatarImg } from "../constants";
 import clsx from "clsx";
+import { getDatasFromAxios } from "../utils";
 
 const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers();
   }, []);
 
   return (
@@ -46,7 +46,7 @@ const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
             <div key={idx} className="mt-3 flex items-center gap-3">
               <img
                 src={
-                  users.find((item2) => item2.id == item.person)?.imgPath ??
+                  users?.find((item2) => item2.id == item.person)?.imgPath ??
                   avatarImg
                 }
                 className="h-10 w-10 self-start rounded-lg object-cover"
@@ -57,7 +57,7 @@ const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
                   <span className="font-bold text-black">
                     {
                       users
-                        .find((item2) => item2.id == item.person)
+                        ?.find((item2) => item2.id == item.person)
                         ?.name.split(" ")[0]
                     }
                   </span>{" "}

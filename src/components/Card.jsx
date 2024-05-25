@@ -4,7 +4,7 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Link } from "react-router-dom";
-import { getDuration } from "../utils";
+import { getDatasFromAxios, getDuration } from "../utils";
 import { useEffect, useState } from "react";
 import { avatarImg } from "../constants";
 
@@ -53,11 +53,10 @@ const Card = ({ task }) => {
   const duration = getDuration(startDateTime, endDateTime);
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers();
   }, []);
 
   return (
@@ -90,7 +89,7 @@ const Card = ({ task }) => {
               <img
                 key={idx}
                 src={
-                  users.find((item2) => item2.id == item)?.imgPath ?? avatarImg
+                  users?.find((item2) => item2.id == item)?.imgPath ?? avatarImg
                 }
                 className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
               />
