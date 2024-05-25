@@ -20,17 +20,14 @@ const ProjectList = () => {
             <IconLabel type="share" hoverable={true} />
 
             <div className="cursor-pointer">
-              <MoreHorizIcon
-                fontSize="large"
-                className=""
-              />
+              <MoreHorizIcon fontSize="large" className="" />
             </div>
           </div>
         </div>
 
         {/* projects */}
         {projects.length <= 0 ? (
-          <div className="flex h-60 items-center justify-center rounded-xl">
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100">
             <p>There is no project</p>
           </div>
         ) : (
