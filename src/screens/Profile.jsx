@@ -8,9 +8,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import CircleIcon from "@mui/icons-material/Circle";
 import { Task } from "../components/Task";
 import ProjectsTable from "../components/ProjectsTable";
-import { avatarImg } from "../constants";
-import { createActivity } from "../utils";
+import { avatarImg, firebaseRealtimeDatabaseURL } from "../constants";
+import { createActivity, getDatasFromAxios } from "../utils";
 import PaginationButtons from "../components/PaginationButtons";
+import axios from "axios";
+import Loading from "../components/Loading";
 
 const formatFieldName = (fieldName) => {
   if (fieldName === "id") {
@@ -47,6 +49,7 @@ const Profile = () => {
   const [userTasks, setUserTasks] = useState([]);
   const [projectCurrentPage, setProjectCurrentPage] = useState(1);
   const [userProjects, setUserProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -96,35 +99,40 @@ const Profile = () => {
     }
   };
 
-  const editDivisionId = () => {
-    const existingUsersJSON = localStorage.getItem("users");
-    const existingUsers = existingUsersJSON
-      ? JSON.parse(existingUsersJSON).map((item) => {
-          if (item.id == user?.id) {
-            return { ...item, divisionId };
-          }
+  const editDivisionId = async () => {
+    // firebase
+    axios
+      .patch(`${firebaseRealtimeDatabaseURL}/users/${user.id}.json`, {
+        divisionId,
+      })
+      .then((res) => console.log(res.data))
+      .catch((err) => console.log(err));
 
-          return item;
-        })
-      : [];
+    // local storage
+    // const existingUsersJSON = localStorage.getItem("users");
+    // const existingUsers = existingUsersJSON
+    //   ? JSON.parse(existingUsersJSON).map((item) => {
+    //       if (item.id == user?.id) {
+    //         return { ...item, divisionId };
+    //       }
 
-    localStorage.setItem("users", JSON.stringify(existingUsers));
+    //       return item;
+    //     })
+    //   : [];
+
+    // localStorage.setItem("users", JSON.stringify(existingUsers));
 
     // if user is myself
     if (!id) {
-      localStorage.setItem(
-        "user",
-        JSON.stringify(existingUsers.find((item) => item.id == user.id)),
-      );
-
+      localStorage.setItem("user", JSON.stringify({ ...user, divisionId }));
       dispatch(authActions.changeDivisionId(divisionId));
 
-      createActivity(
+      await createActivity(
         myself.id,
         `changed division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
       );
     } else {
-      createActivity(
+      await createActivity(
         myself.id,
         `changed ${user.name} division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
       );
@@ -141,24 +149,35 @@ const Profile = () => {
     setDisableDivisionSelect(true);
   };
 
+  // check if user is myself
   useEffect(() => {
-    const usersJSON = localStorage.getItem("users");
-    const users = usersJSON ? JSON.parse(usersJSON) : [];
+    // const usersJSON = localStorage.getItem("users");
+    // const users = usersJSON ? JSON.parse(usersJSON) : [];
 
     let user = myself;
 
     if (id) {
-      const { password, ...userWithoutPassword } = users.find(
-        (item) => item.id == id,
-      );
-      user = userWithoutPassword;
+      axios
+        .get(`${firebaseRealtimeDatabaseURL}/users/${id}.json`)
+        .then((res) => {
+          if (res.data) {
+            user = { id, ...res.data };
+
+            setUser(user);
+            setDivisionId(user.divisionId);
+            setUserTasks(tasks.filter((item) => item.people.includes(user.id)));
+            setUserProjects(
+              projects.filter((item) => item.people.includes(user.id)),
+            );
+          }
+        })
+        .catch((err) => console.log(err));
+    } else {
+      setUser(user);
+      setDivisionId(user.divisionId);
+      setUserTasks(tasks.filter((item) => item.people.includes(user.id)));
+      setUserProjects(projects.filter((item) => item.people.includes(user.id)));
     }
-
-    setUser(user);
-    setDivisionId(user.divisionId);
-
-    setUserTasks(tasks.filter((item) => item.people.includes(user.id)));
-    setUserProjects(projects.filter((item) => item.people.includes(user.id)));
   }, [id, myself, tasks, projects]);
 
   useEffect(() => {
@@ -168,14 +187,17 @@ const Profile = () => {
   }, [id, myself.id, navigate]);
 
   useEffect(() => {
-    setDivisions(
-      localStorage.getItem("divisions")
-        ? JSON.parse(localStorage.getItem("divisions"))
-        : [],
-    );
+    setLoading(true);
+
+    const getDivisions = async () => {
+      setDivisions(await getDatasFromAxios("divisions"));
+    };
+    getDivisions().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="flex flex-col gap-5 pb-20">
       <TopBar mode="only_profile" />
 
@@ -194,7 +216,7 @@ const Profile = () => {
             {!id
               ? Object.keys(user).map(
                   (item, idx) =>
-                    !["imgPath", "divisionId"].includes(item) && (
+                    !["imgPath", "divisionId", "password"].includes(item) && (
                       <div key={idx} className="flex flex-col">
                         <p className="font-bold">{formatFieldName(item)}</p>
                         <p className="text-sm">
@@ -212,6 +234,7 @@ const Profile = () => {
                       "username",
                       "imgPath",
                       "divisionId",
+                      "password",
                     ].includes(item) && (
                       <div key={idx} className="flex flex-col">
                         <p className="font-bold">{formatFieldName(item)}</p>
@@ -336,40 +359,42 @@ const Profile = () => {
         {/* tasks */}
         {paginatedTasks.length > 0 && (
           <div className="flex flex-col gap-3">
-            {paginatedTasks.map((item, idx) => (
-              <Link
-                key={idx}
-                to={`/tasks/${item.id}`}
-                className="flex cursor-pointer items-center gap-3 rounded-xl p-3 shadow-sm hover:shadow-md"
-              >
-                <CircleIcon
-                  sx={{
-                    fontSize: "15px",
-                    marginLeft: "15px",
-                    marginRight: "15px",
-                    color: "darkslategray",
-                  }}
-                />
+            <div className="flex flex-col gap-3">
+              {paginatedTasks.map((item, idx) => (
+                <Link
+                  key={idx}
+                  to={`/tasks/${item.id}`}
+                  className="flex cursor-pointer items-center gap-3 rounded-xl bg-blue-50 p-3 shadow-sm hover:shadow-md"
+                >
+                  <CircleIcon
+                    sx={{
+                      fontSize: "15px",
+                      marginLeft: "15px",
+                      marginRight: "15px",
+                      color: "darkslategray",
+                    }}
+                  />
 
-                <Task task={item} type="no_action" />
-              </Link>
-            ))}
+                  <Task task={item} type="no_action" />
+                </Link>
+              ))}
+            </div>
+
+            {/* pagination buttons */}
+            <PaginationButtons
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+              totalPages={totalPages}
+            />
           </div>
         )}
 
         {/* no task message box */}
         {paginatedTasks.length === 0 && (
-          <div className="flex h-60 items-center justify-center rounded-xl text-gray-600">
-            <p>There is no task</p>
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-600">
+            <p className="text-gray-700">There is no task</p>
           </div>
         )}
-
-        {/* pagination buttons */}
-        <PaginationButtons
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalPages={totalPages}
-        />
       </div>
 
       {/* completed projects */}
@@ -379,22 +404,24 @@ const Profile = () => {
 
         {/* projects */}
         {paginatedProjects.length > 0 && (
-          <ProjectsTable projects={paginatedProjects} />
+          <div className="flex flex-col gap-3">
+            <ProjectsTable projects={paginatedProjects} />
+
+            {/* pagination buttons */}
+            <PaginationButtons
+              currentPage={projectCurrentPage}
+              setCurrentPage={setProjectCurrentPage}
+              totalPages={projectTotalPages}
+            />
+          </div>
         )}
 
         {/* no project message box */}
         {paginatedProjects.length === 0 && (
-          <div className="flex h-60 items-center justify-center rounded-xl">
-            <p>There is no project</p>
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100">
+            <p className="text-gray-700">There is no project</p>
           </div>
         )}
-
-        {/* pagination buttons */}
-        <PaginationButtons
-          currentPage={projectCurrentPage}
-          setCurrentPage={setProjectCurrentPage}
-          totalPages={projectTotalPages}
-        />
       </div>
     </div>
   );
