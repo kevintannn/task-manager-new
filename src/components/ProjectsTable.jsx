@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import { projectTypes } from "../data";
 import {
   Table,
   TableBody,
@@ -14,9 +13,13 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { avatarImg } from "../constants";
+import { getDatasFromAxios } from "../utils";
+import Loading from "./Loading";
 
 const ProjectsTable = ({ projects, fontsize }) => {
   const [users, setUsers] = useState([]);
+  const [projectTypes, setProjectTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -25,14 +28,18 @@ const ProjectsTable = ({ projects, fontsize }) => {
   };
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
+
+    const fetchData = async () => {
+      setProjectTypes(await getDatasFromAxios("projectTypes"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <TableContainer
       sx={{
         borderRadius: "15px",
@@ -87,7 +94,7 @@ const ProjectsTable = ({ projects, fontsize }) => {
                     <img
                       key={idx}
                       src={
-                        users.find((item) => item.id == item2)?.imgPath ??
+                        users?.find((item) => item.id == item2)?.imgPath ??
                         avatarImg
                       }
                       className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
