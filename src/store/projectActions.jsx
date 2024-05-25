@@ -1,12 +1,20 @@
 import { projectActions } from "./projectSlice";
 import { uiActions } from "./uiSlice";
+import { getDatasFromAxios } from "../utils";
 
 export const getProjects = () => {
-  return (dispatch) => {
-    const projectsJSON = localStorage.getItem("projects");
-    const projects = projectsJSON ? JSON.parse(projectsJSON) : [];
+  return async (dispatch) => {
+    // const projectsJSON = localStorage.getItem("projects");
+    // const projects = projectsJSON ? JSON.parse(projectsJSON) : [];
 
-    dispatch(projectActions.replaceProjects(projects));
+    // dispatch(projectActions.replaceProjects(projects));
+
+    // firebase
+    const getProjectsFromDatabase = async () => {
+      const data = await getDatasFromAxios("projects");
+      dispatch(projectActions.replaceProjects(data ?? []));
+    };
+    await getProjectsFromDatabase();
   };
 };
 
