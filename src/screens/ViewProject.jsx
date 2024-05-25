@@ -26,13 +26,16 @@ const ViewProject = () => {
 
   const navigate = useNavigate();
 
-  const handleDeleteProject = () => {
+  const handleDeleteProject = async () => {
     if (!confirm("Confirm delete project? (can not be undone)")) {
       return;
     }
 
-    if (dispatch(deleteProject(id))) {
-      createActivity(user.id, `deleted "${project.projectName}" project.`);
+    if (await dispatch(deleteProject(id))) {
+      await createActivity(
+        user.id,
+        `deleted "${project.projectName}" project.`,
+      );
       return navigate("/");
     }
   };
