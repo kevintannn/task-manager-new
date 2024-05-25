@@ -31,6 +31,8 @@ const ViewProject = () => {
       return;
     }
 
+    setLoading(true);
+
     if (await dispatch(deleteProject(id))) {
       await createActivity(
         user.id,
@@ -41,7 +43,7 @@ const ViewProject = () => {
   };
 
   useEffect(() => {
-    if (!project) {
+    if (!project && !loading) {
       dispatch(
         uiActions.setNotification({
           type: "error",
@@ -52,7 +54,7 @@ const ViewProject = () => {
 
       return navigate("/");
     }
-  }, [project, navigate, dispatch]);
+  }, [project, navigate, dispatch, loading]);
 
   useEffect(() => {
     setLoading(true);
