@@ -1,6 +1,5 @@
 /* eslint-disable react/prop-types */
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import { projectTypes } from "../data";
 import {
   Table,
   TableBody,
@@ -14,9 +13,13 @@ import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { avatarImg } from "../constants";
+import { getDatasFromAxios } from "../utils";
+import Loading from "./Loading";
 
 const ProjectsTable = ({ projects, fontsize }) => {
   const [users, setUsers] = useState([]);
+  const [projectTypes, setProjectTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -25,15 +28,23 @@ const ProjectsTable = ({ projects, fontsize }) => {
   };
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
+
+    const fetchData = async () => {
+      setProjectTypes(await getDatasFromAxios("projectTypes"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
-    <TableContainer>
+  return loading ? (
+    <Loading />
+  ) : (
+    <TableContainer
+      sx={{
+        borderRadius: "15px",
+      }}
+    >
       <Table
         sx={{
           "th, td": {
@@ -42,10 +53,9 @@ const ProjectsTable = ({ projects, fontsize }) => {
             fontSize: fontsize ?? "13px",
           },
           "tr th": {
-            backgroundColor: "#f9f7fc",
             fontWeight: "bold",
             color: "slategray",
-            borderRadius: "10px",
+            bgcolor: "rgb(219 234 254)",
           },
         }}
       >
@@ -62,7 +72,7 @@ const ProjectsTable = ({ projects, fontsize }) => {
         <TableBody>
           {projects.map((item, idx) => (
             <TableRow
-              className="cursor-pointer hover:bg-gray-100"
+              className="cursor-pointer hover:bg-blue-50"
               key={idx}
               onClick={() => handleRowClick(item.id)}
             >
@@ -83,7 +93,10 @@ const ProjectsTable = ({ projects, fontsize }) => {
                   {item.people.map((item2, idx) => (
                     <img
                       key={idx}
-                      src={users.find((item) => item.id == item2)?.imgPath ?? avatarImg}
+                      src={
+                        users?.find((item) => item.id == item2)?.imgPath ??
+                        avatarImg
+                      }
                       className={`${idx !== 0 ? "-ml-4" : ""} h-9 w-9 rounded-full border-[3px] border-white object-cover`}
                     />
                   ))}

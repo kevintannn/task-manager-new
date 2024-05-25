@@ -4,31 +4,28 @@ import { formatDistanceToNow } from "date-fns";
 import { useEffect, useState } from "react";
 import { avatarImg } from "../constants";
 import clsx from "clsx";
+import { getDatasFromAxios } from "../utils";
 
 const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers();
   }, []);
 
   return (
     <div
-      className={clsx(
-        cname,
-        "flex flex-col rounded-lg bg-blue-50/50 p-5 text-xs",
-      )}
+      className={clsx(cname, "flex flex-col rounded-lg bg-blue-50 p-5 text-xs")}
     >
       {/* header */}
       <div className="flex items-center justify-between border-b-2 border-b-gray-200 pb-3">
         <h1 className="text-lg font-bold">Activity</h1>
         {limit ? (
           <p
-            className="cursor-pointer text-sm text-blue-800 hover:text-blue-400"
+            className="cursor-pointer text-sm text-blue-700 hover:text-blue-500"
             onClick={showModal}
           >
             See All
@@ -46,10 +43,10 @@ const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
 
         return (
           render && (
-            <div key={idx} className="mt-3 flex items-center gap-5">
+            <div key={idx} className="mt-3 flex items-center gap-3">
               <img
                 src={
-                  users.find((item2) => item2.id == item.person)?.imgPath ??
+                  users?.find((item2) => item2.id == item.person)?.imgPath ??
                   avatarImg
                 }
                 className="h-10 w-10 self-start rounded-lg object-cover"
@@ -60,7 +57,7 @@ const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
                   <span className="font-bold text-black">
                     {
                       users
-                        .find((item2) => item2.id == item.person)
+                        ?.find((item2) => item2.id == item.person)
                         ?.name.split(" ")[0]
                     }
                   </span>{" "}

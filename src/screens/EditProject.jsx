@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { projectTypes } from "../data";
 import PrimaryButton from "../components/PrimaryButton";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,7 +21,10 @@ import {
   Select,
 } from "@mui/material";
 import { format } from "date-fns";
-import { createActivity } from "../utils";
+import { createActivity, getDatasFromAxios } from "../utils";
+import axios from "axios";
+import { firebaseRealtimeDatabaseURL } from "../constants";
+import Loading from "../components/Loading";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -44,6 +46,7 @@ const EditProject = () => {
   const project = projects.find((item) => item.id == id);
 
   const [users, setUsers] = useState([]);
+  const [projectTypes, setProjectTypes] = useState([]);
   const [projectName, setProjectName] = useState(project.projectName);
   const [deadline, setDeadline] = useState(
     format(project.deadline, "yyyy-MM-dd") +
@@ -54,6 +57,7 @@ const EditProject = () => {
   const [selectedPeople, setSelectedPeople] = useState(project.people.slice(1));
   const [description, setDescription] = useState(project.description);
   const [status, setStatus] = useState(project.status);
+  const [loading, setLoading] = useState(true);
 
   const [projectNameError, setProjectNameError] = useState(null);
   const [deadlineError, setDeadlineError] = useState(null);
@@ -67,7 +71,7 @@ const EditProject = () => {
     setSelectedPeopleError(validateTaskPeople(e.target.value));
   };
 
-  const handleEditProject = () => {
+  const handleEditProject = async () => {
     if (
       projectName === "" ||
       deadline === "" ||
@@ -102,81 +106,147 @@ const EditProject = () => {
       return;
     }
 
-    // update database
-    const existingProjectsJSON = localStorage.getItem("projects");
-    const existingProjects = existingProjectsJSON
-      ? JSON.parse(existingProjectsJSON).map((item) => {
-          if (item.id == project.id) {
-            return {
-              ...item,
-              projectName,
-              deadline,
-              projectType,
-              people: [project.people[0], ...selectedPeople],
-              description,
-              status,
-              updatedBy: user.id,
-              updatedAt: new Date(),
-            };
+    // firebase
+    setLoading(true);
+
+    const updatedProject = {
+      projectName,
+      deadline,
+      projectType,
+      people: [project.people[0], ...selectedPeople],
+      description,
+      status,
+      updatedBy: user.id,
+      updatedAt: new Date(),
+    };
+
+    await axios
+      .patch(
+        `${firebaseRealtimeDatabaseURL}/projects/${id}.json`,
+        updatedProject,
+      )
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(
+            projectActions.modifyProject({
+              id: id,
+              properties: updatedProject,
+            }),
+          );
+
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Project updated!",
+              open: true,
+            }),
+          );
+
+          // check if title is updated
+          if (project.projectName !== updatedProject.projectName) {
+            await createActivity(
+              user.id,
+              `changed project name of "${project.projectName}" to "${updatedProject.projectName}".`,
+            );
           }
 
-          return item;
-        })
-      : [];
+          // check if status is updated
+          if (project.status !== updatedProject.status) {
+            await createActivity(
+              user.id,
+              `changed project status of "${updatedProject.projectName}" from "${project.status}" to "${updatedProject.status}".`,
+            );
+          }
 
-    localStorage.setItem("projects", JSON.stringify(existingProjects));
+          await createActivity(
+            user.id,
+            `updated the details of "${updatedProject.projectName}" project.`,
+          );
 
-    dispatch(projectActions.replaceProjects(existingProjects));
+          return navigate(-1);
+        }
+      })
+      .catch((err) => console.log(err));
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Project updated!",
-        open: true,
-      }),
-    );
+    // local storage
+    // const existingProjectsJSON = localStorage.getItem("projects");
+    // const existingProjects = existingProjectsJSON
+    //   ? JSON.parse(existingProjectsJSON).map((item) => {
+    //       if (item.id == project.id) {
+    //         return {
+    //           ...item,
+    //           projectName,
+    //           deadline,
+    //           projectType,
+    //           people: [project.people[0], ...selectedPeople],
+    //           description,
+    //           status,
+    //           updatedBy: user.id,
+    //           updatedAt: new Date(),
+    //         };
+    //       }
 
-    const existingProject = existingProjects.find(
-      (item) => item.id == project.id,
-    );
+    //       return item;
+    //     })
+    //   : [];
 
-    createActivity(
-      user.id,
-      `updated the details of "${existingProject.projectName}" project.`,
-    );
+    // localStorage.setItem("projects", JSON.stringify(existingProjects));
 
-    // check if status is updated
-    if (project.status !== existingProject.status) {
-      createActivity(
-        user.id,
-        `changed project status of "${existingProject.projectName}" from "${project.status}" to "${existingProject.status}".`,
-      );
-    }
+    // dispatch(projectActions.replaceProjects(existingProjects));
 
-    // check if title is updated
-    if (project.projectName !== existingProject.projectName) {
-      createActivity(
-        user.id,
-        `changed project name of "${project.projectName}" to "${existingProject.projectName}".`,
-      );
-    }
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Project updated!",
+    //     open: true,
+    //   }),
+    // );
 
-    return navigate(-1);
+    // const existingProject = existingProjects.find(
+    //   (item) => item.id == project.id,
+    // );
+
+    // createActivity(
+    //   user.id,
+    //   `updated the details of "${existingProject.projectName}" project.`,
+    // );
+
+    // // check if status is updated
+    // if (project.status !== existingProject.status) {
+    //   createActivity(
+    //     user.id,
+    //     `changed project status of "${existingProject.projectName}" from "${project.status}" to "${existingProject.status}".`,
+    //   );
+    // }
+
+    // // check if title is updated
+    // if (project.projectName !== existingProject.projectName) {
+    //   createActivity(
+    //     user.id,
+    //     `changed project name of "${project.projectName}" to "${existingProject.projectName}".`,
+    //   );
+    // }
+
+    // return navigate(-1);
   };
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
+
+    const fetchData = async () => {
+      setProjectTypes(await getDatasFromAxios("projectTypes"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="mt-5 flex flex-col gap-5">
       <h1 className="text-2xl font-bold">Edit Project</h1>
 
-      <div className="flex justify-center gap-10 rounded-xl bg-blue-50/50 p-10">
+      <div className="flex justify-center gap-10 rounded-xl bg-blue-50 p-10">
         {/* left section */}
         <div className="flex w-[700px] flex-col gap-3">
           <div className="flex flex-col gap-1">
@@ -258,13 +328,15 @@ const EditProject = () => {
               onChange={handlePeopleChange}
               renderValue={(selected) =>
                 selected
-                  .map((item) => users.find((item2) => item2.id === item)?.name)
+                  .map(
+                    (item) => users?.find((item2) => item2.id === item)?.name,
+                  )
                   .join(", ")
               }
               MenuProps={MenuProps}
             >
               {users
-                .filter((item) => item.id !== user.id)
+                ?.filter((item) => item.id !== user.id)
                 .map((item) => (
                   <MenuItem key={item.id} value={item.id}>
                     <Checkbox checked={selectedPeople.indexOf(item.id) > -1} />

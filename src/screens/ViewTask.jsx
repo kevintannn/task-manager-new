@@ -7,9 +7,12 @@ import PrimaryButton from "../components/PrimaryButton";
 import { taskActions } from "../store/taskSlice";
 import { uiActions } from "../store/uiSlice";
 import Person from "../components/Person";
-import { createActivity, getDuration } from "../utils";
+import { createActivity, getDatasFromAxios, getDuration } from "../utils";
 import { useEffect, useState } from "react";
 import { deleteTask } from "../store/taskActions";
+import axios from "axios";
+import { firebaseRealtimeDatabaseURL } from "../constants";
+import Loading from "../components/Loading";
 
 const ViewTask = () => {
   const { id } = useParams();
@@ -22,48 +25,79 @@ const ViewTask = () => {
   const [users, setUsers] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [duration, setDuration] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
-  const handleMarkAsDone = () => {
+  const handleMarkAsDone = async () => {
     if (!confirm("Confirm mark task as done?")) {
       return;
     }
 
-    const existingTasksJSON = localStorage.getItem("tasks");
-    const existingTasks = existingTasksJSON
-      ? JSON.parse(existingTasksJSON)
-      : [];
+    const modifiedProperties = {
+      completed: true,
+      completedBy: user.id,
+    };
 
-    existingTasks.find((item) => item.id === task.id).completed = true;
-    existingTasks.find((item) => item.id === task.id).completedBy = user.id;
+    // firebase
+    await axios
+      .patch(
+        `${firebaseRealtimeDatabaseURL}/tasks/${id}.json`,
+        modifiedProperties,
+      )
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(
+            taskActions.modifyTask({ id: id, properties: modifiedProperties }),
+          );
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Task marked as completed!",
+              open: true,
+            }),
+          );
 
-    localStorage.setItem("tasks", JSON.stringify(existingTasks));
-    dispatch(taskActions.replaceTasks(existingTasks));
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Task marked as completed!",
-        open: true,
-      }),
-    );
+          await createActivity(user.id, `marked "${task.title}" task as done.`);
+        }
+      })
+      .catch((err) => console.log(err));
 
-    createActivity(user.id, `marked "${task.title}" task as done.`);
+    // local storage
+    // const existingTasksJSON = localStorage.getItem("tasks");
+    // const existingTasks = existingTasksJSON
+    //   ? JSON.parse(existingTasksJSON)
+    //   : [];
+
+    // existingTasks.find((item) => item.id === task.id).completed = true;
+    // existingTasks.find((item) => item.id === task.id).completedBy = user.id;
+
+    // localStorage.setItem("tasks", JSON.stringify(existingTasks));
+    // dispatch(taskActions.replaceTasks(existingTasks));
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Task marked as completed!",
+    //     open: true,
+    //   }),
+    // );
   };
 
-  const handleDeleteTask = () => {
+  const handleDeleteTask = async () => {
     if (!confirm("Confirm delete task? (can not be undone)")) {
       return;
     }
 
-    if (dispatch(deleteTask(id))) {
-      createActivity(user.id, `deleted "${task.title}" task.`);
+    setLoading(true);
+
+    if (await dispatch(deleteTask(id))) {
+      await createActivity(user.id, `deleted "${task.title}" task.`);
       return navigate("/");
     }
   };
 
   useEffect(() => {
-    if (!task) {
+    if (!task && !loading) {
       dispatch(
         uiActions.setNotification({
           type: "error",
@@ -75,27 +109,27 @@ const ViewTask = () => {
       return navigate("/");
     }
 
-    const startDateTime = new Date(task.startDateTime);
-    const endDateTime = new Date(task.endDateTime);
+    if (!loading) {
+      const startDateTime = new Date(task.startDateTime);
+      const endDateTime = new Date(task.endDateTime);
 
-    setDuration(getDuration(startDateTime, endDateTime));
-  }, [navigate, task, dispatch]);
+      setDuration(getDuration(startDateTime, endDateTime));
+    }
+  }, [navigate, task, dispatch, loading]);
 
   useEffect(() => {
-    setDivisions(
-      localStorage.getItem("divisions")
-        ? JSON.parse(localStorage.getItem("divisions"))
-        : [],
-    );
+    setLoading(true);
 
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
-  }, []);
+    const fetchData = async () => {
+      setDivisions(await getDatasFromAxios("divisions"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
+  }, [dispatch]);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     task && (
       <div className="my-20 flex justify-center gap-20">
         {/* left section */}
@@ -131,7 +165,7 @@ const ViewTask = () => {
               {task?.updatedBy && (
                 <p className="text-xs text-gray-600">
                   Last edited by{" "}
-                  {users.find((item) => item.id == task.updatedBy)?.name} at{" "}
+                  {users?.find((item) => item.id == task.updatedBy)?.name} at{" "}
                   {format(task.updatedAt, "d MMM y (hh:mm:ss aa)")}
                 </p>
               )}
@@ -143,7 +177,7 @@ const ViewTask = () => {
           </div>
 
           {/* lower */}
-          <div className="rounded-lg bg-blue-50">
+          <div className="rounded-lg bg-blue-100">
             <p className="p-5 text-justify leading-6 tracking-wide">
               {task.description}
             </p>
@@ -153,7 +187,8 @@ const ViewTask = () => {
         {/* right section */}
         <div className="flex flex-col gap-5">
           <p className="text-sm font-bold">
-            Division: {divisions.find((item) => item.id == task.division)?.name}
+            Division:{" "}
+            {divisions?.find((item) => item.id == task.division)?.name}
           </p>
 
           <Box

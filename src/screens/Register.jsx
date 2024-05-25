@@ -16,6 +16,10 @@ import { useDispatch, useSelector } from "react-redux";
 import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
 import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
 import { uiActions } from "../store/uiSlice";
+import axios from "axios";
+import { getDatasFromAxios } from "../utils";
+import { firebaseRealtimeDatabaseURL } from "../constants";
+import Loading from "../components/Loading";
 
 const Register = () => {
   const auth = useSelector((state) => state.auth);
@@ -30,6 +34,7 @@ const Register = () => {
   const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [nameError, setNameError] = useState(null);
   const [emailError, setEmailError] = useState(null);
@@ -44,7 +49,7 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (
       nameError ||
       emailError ||
@@ -98,6 +103,10 @@ const Register = () => {
       return;
     }
 
+    // process register
+    // firebase
+    setLoading(true);
+
     // check if user is registered
     const existUser = users.find((item) => item.email === email);
     const existUsername = users.find((item) => item.username === username);
@@ -116,266 +125,358 @@ const Register = () => {
       return;
     }
 
-    // register user
-    const newUserId = users?.[users.length - 1]?.id
-      ? parseInt(users?.[users.length - 1]?.id) + 1
-      : 1;
+    // get not assigned division id
+    let notAssignedDivisionId = null;
+
+    await axios
+      .get(
+        `${firebaseRealtimeDatabaseURL}/divisions.json?orderBy="name"&equalTo="Not Assigned"`,
+      )
+      .then((res) => {
+        if (res.data) {
+          notAssignedDivisionId = Object.keys(res.data)[0];
+        }
+      })
+      .catch((err) => console.log(err));
+
+    if (!notAssignedDivisionId) {
+      dispatch(
+        uiActions.setNotification({
+          type: "error",
+          message: "Could not get division id!",
+          open: true,
+        }),
+      );
+
+      return;
+    }
 
     const newUser = {
-      id: newUserId,
       name,
       email,
       gender,
       contactNumber,
       imgPath: null,
-      divisionId: 1,
+      divisionId: notAssignedDivisionId,
       username,
       password,
     };
 
-    const existingUsers = users;
+    await axios
+      .post(`${firebaseRealtimeDatabaseURL}/users.json`, newUser)
+      .then((res) => {
+        if (res.data) {
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Successfully registered. Please login!",
+              open: true,
+            }),
+          );
 
-    existingUsers.push(newUser);
-    localStorage.setItem("users", JSON.stringify(existingUsers));
+          return navigate("/login");
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => console.log(err));
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Successfully registered. Please login!",
-        open: true,
-      }),
-    );
+    // local storage
+    // // check if user is registered
+    // const existUser = users.find((item) => item.email === email);
+    // const existUsername = users.find((item) => item.username === username);
 
-    return navigate("/login");
+    // if (existUser) {
+    //   setEmailError("This email is registered!");
+    //   flag = 1;
+    // }
+
+    // if (existUsername) {
+    //   setUsernameError("Username is not available!");
+    //   flag = 1;
+    // }
+
+    // if (flag === 1) {
+    //   return;
+    // }
+
+    // // register user
+    // const newUserId = users?.[users.length - 1]?.id
+    //   ? parseInt(users?.[users.length - 1]?.id) + 1
+    //   : 1;
+
+    // const newUser = {
+    //   id: newUserId,
+    //   name,
+    //   email,
+    //   gender,
+    //   contactNumber,
+    //   imgPath: null,
+    //   divisionId: 1,
+    //   username,
+    //   password,
+    // };
+
+    // const existingUsers = users;
+
+    // existingUsers.push(newUser);
+    // localStorage.setItem("users", JSON.stringify(existingUsers));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Successfully registered. Please login!",
+    //     open: true,
+    //   }),
+    // );
+
+    // return navigate("/login");
   };
 
   useEnterKeyPressEffect(registerRef);
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers();
   }, []);
 
   return auth.user.id ? (
     <Navigate to="/" />
   ) : (
-    <div className="relative flex h-screen w-screen items-center justify-center text-sm">
-      {/* box */}
-      <div className="flex w-[700px] flex-col justify-center">
-        {/* header */}
-        <div className="mb-5 flex flex-col gap-1">
-          <h1 className="text-4xl font-extrabold">Register</h1>
-          <p className="text-base font-semibold">Create an account! 🌽</p>
+    <>
+      {loading && (
+        <div className="h-screen">
+          <Loading />
         </div>
+      )}
 
-        {/* forms */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="text" className="">
-              Full Name
-            </label>
-            <input
-              className="rounded-md border border-gray-300 p-3 py-2  outline-none"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                setNameError(validateName(e.target.value));
-              }}
-              type="text"
-              placeholder="eg: Will Jo"
-              autoComplete="none"
-            />
+      {!loading && (
+        <div className="relative flex h-screen w-screen items-center justify-center text-sm">
+          {/* box */}
+          <div className="flex w-[700px] flex-col justify-center">
+            {/* header */}
+            <div className="mb-5 flex flex-col gap-1">
+              <h1 className="text-4xl font-extrabold">Register</h1>
+              <p className="text-base font-semibold">Create an account! 🌽</p>
+            </div>
 
-            {nameError && <p className=" text-red-600">{nameError}</p>}
-          </div>
+            {/* forms */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="text" className="">
+                  Full Name
+                </label>
+                <input
+                  className="rounded-md border border-gray-300 p-3 py-2  outline-none"
+                  value={name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    setNameError(validateName(e.target.value));
+                  }}
+                  type="text"
+                  placeholder="eg: Will Jo"
+                  autoComplete="none"
+                />
 
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="text" className="">
-              Email
-            </label>
-            <input
-              className="rounded-md border border-gray-300 p-3 py-2  outline-none"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setEmailError(validateEmail(e.target.value));
-              }}
-              type="email"
-              placeholder="your@email.com"
-              autoComplete="none"
-            />
+                {nameError && <p className=" text-red-600">{nameError}</p>}
+              </div>
 
-            {emailError && <p className=" text-red-600">{emailError}</p>}
-          </div>
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="text" className="">
+                  Email
+                </label>
+                <input
+                  className="rounded-md border border-gray-300 p-3 py-2  outline-none"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setEmailError(validateEmail(e.target.value));
+                  }}
+                  type="email"
+                  placeholder="your@email.com"
+                  autoComplete="none"
+                />
 
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="username" className="">
-              Username
-            </label>
-            <input
-              className="rounded-md border border-gray-300 p-3 py-2 outline-none"
-              value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
-                setUsernameError(validateUsername(e.target.value));
-              }}
-              type="text"
-              placeholder="your_username"
-            />
+                {emailError && <p className=" text-red-600">{emailError}</p>}
+              </div>
 
-            {usernameError && <p className=" text-red-600">{usernameError}</p>}
-          </div>
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="username" className="">
+                  Username
+                </label>
+                <input
+                  className="rounded-md border border-gray-300 p-3 py-2 outline-none"
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.target.value);
+                    setUsernameError(validateUsername(e.target.value));
+                  }}
+                  type="text"
+                  placeholder="your_username"
+                />
 
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="text" className="">
-              Contact Number
-            </label>
-            <input
-              className="rounded-md border border-gray-300 p-3 py-2  outline-none"
-              value={contactNumber}
-              onChange={(e) => {
-                setContactNumber(e.target.value);
-                setContactNumberError(validateContactNumber(e.target.value));
-              }}
-              type="text"
-              placeholder="+62xxxxxxxxxxx"
-              autoComplete="none"
-            />
+                {usernameError && (
+                  <p className=" text-red-600">{usernameError}</p>
+                )}
+              </div>
 
-            {contactNumberError && (
-              <p className=" text-red-600">{contactNumberError}</p>
-            )}
-          </div>
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="text" className="">
+                  Contact Number
+                </label>
+                <input
+                  className="rounded-md border border-gray-300 p-3 py-2  outline-none"
+                  value={contactNumber}
+                  onChange={(e) => {
+                    setContactNumber(e.target.value);
+                    setContactNumberError(
+                      validateContactNumber(e.target.value),
+                    );
+                  }}
+                  type="text"
+                  placeholder="+62xxxxxxxxxxx"
+                  autoComplete="none"
+                />
 
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="text" className="">
-              Image
-            </label>
+                {contactNumberError && (
+                  <p className=" text-red-600">{contactNumberError}</p>
+                )}
+              </div>
 
-            <div className="flex items-center gap-3">
-              <input
-                ref={imageInputRef}
-                className="rounded-md border border-gray-300 p-3 py-2 outline-none"
-                onChange={(e) => setImage(e.target.files[0])}
-                type="file"
-              />
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="text" className="">
+                  Image
+                </label>
 
-              {image && (
-                <>
-                  <img
-                    className="h-10 w-10 object-cover"
-                    src={URL.createObjectURL(image)}
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={imageInputRef}
+                    className="rounded-md border border-gray-300 p-3 py-2 outline-none"
+                    onChange={(e) => setImage(e.target.files[0])}
+                    type="file"
                   />
 
-                  <div
-                    className="cursor-pointer"
-                    onClick={() => {
-                      setImage(undefined);
-                      imageInputRef.current.value = "";
-                    }}
-                  >
-                    {/* TODO: continue register function */}
-                    <CloseIcon className="text-red-600" />
-                  </div>
-                </>
-              )}
+                  {image && (
+                    <>
+                      <img
+                        className="h-10 w-10 object-cover"
+                        src={URL.createObjectURL(image)}
+                      />
+
+                      <div
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setImage(undefined);
+                          imageInputRef.current.value = "";
+                        }}
+                      >
+                        <CloseIcon className="text-red-600" />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="text" className="">
+                  Gender
+                </label>
+                <RadioGroup
+                  row
+                  onChange={(e) => {
+                    setGender(e.target.value);
+                    setGenderError(validateGender(e.target.value));
+                  }}
+                >
+                  <FormControlLabel
+                    value="male"
+                    control={<Radio size="small" />}
+                    label="Male"
+                  />
+                  <FormControlLabel
+                    value="female"
+                    control={<Radio size="small" />}
+                    label="Female"
+                  />
+                </RadioGroup>
+
+                {genderError && <p className=" text-red-600">{genderError}</p>}
+              </div>
+
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="password" className="">
+                  Password
+                </label>
+                <input
+                  className="rounded-md border border-gray-300 p-3 py-2  outline-none"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setPasswordError(validatePassword(e.target.value));
+                    setConfirmPasswordError(
+                      validateConfirmPassword(e.target.value, confirmPassword),
+                    );
+                  }}
+                  type="password"
+                  placeholder="Enter your password"
+                />
+
+                {passwordError && (
+                  <p className=" text-red-600">{passwordError}</p>
+                )}
+              </div>
+
+              <div className="mb-3 flex flex-col gap-1">
+                <label htmlFor="password" className="">
+                  Confirm Password
+                </label>
+                <input
+                  className="rounded-md border border-gray-300 p-3 py-2  outline-none"
+                  value={confirmPassword}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setConfirmPasswordError(
+                      validateConfirmPassword(password, e.target.value),
+                    );
+                  }}
+                  type="password"
+                  placeholder="Confirm your password"
+                />
+
+                {confirmPasswordError && (
+                  <p className=" text-red-600">{confirmPasswordError}</p>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="text" className="">
-              Gender
-            </label>
-            <RadioGroup
-              row
-              onChange={(e) => {
-                setGender(e.target.value);
-                setGenderError(validateGender(e.target.value));
-              }}
+            <button
+              ref={registerRef}
+              className="my-5 rounded-md bg-blue-700 p-3 text-white"
+              onClick={handleRegister}
             >
-              <FormControlLabel
-                value="male"
-                control={<Radio size="small" />}
-                label="Male"
-              />
-              <FormControlLabel
-                value="female"
-                control={<Radio size="small" />}
-                label="Female"
-              />
-            </RadioGroup>
+              Register
+            </button>
 
-            {genderError && <p className=" text-red-600">{genderError}</p>}
+            <p className="text-center">
+              Have an account?{" "}
+              <Link
+                to="/login"
+                className="font-bold text-blue-700 hover:underline"
+              >
+                Log in here <ArrowOutwardIcon fontSize="small" />
+              </Link>
+            </p>
           </div>
 
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="password" className="">
-              Password
-            </label>
-            <input
-              className="rounded-md border border-gray-300 p-3 py-2  outline-none"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setPasswordError(validatePassword(e.target.value));
-                setConfirmPasswordError(
-                  validateConfirmPassword(e.target.value, confirmPassword),
-                );
-              }}
-              type="password"
-              placeholder="Enter your password"
-            />
-
-            {passwordError && <p className=" text-red-600">{passwordError}</p>}
-          </div>
-
-          <div className="mb-3 flex flex-col gap-1">
-            <label htmlFor="password" className="">
-              Confirm Password
-            </label>
-            <input
-              className="rounded-md border border-gray-300 p-3 py-2  outline-none"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setConfirmPasswordError(
-                  validateConfirmPassword(password, e.target.value),
-                );
-              }}
-              type="password"
-              placeholder="Confirm your password"
-            />
-
-            {confirmPasswordError && (
-              <p className=" text-red-600">{confirmPasswordError}</p>
-            )}
+          {/* logo */}
+          <div className="absolute left-3 top-3">
+            <MyLogo />
           </div>
         </div>
-
-        <button
-          ref={registerRef}
-          className="my-5 rounded-md bg-blue-700 p-3  text-white"
-          onClick={handleRegister}
-        >
-          Register
-        </button>
-
-        <p className="text-center">
-          Have an account?{" "}
-          <Link to="/login" className="font-bold text-blue-700 hover:underline">
-            Log in here <ArrowOutwardIcon fontSize="small" />
-          </Link>
-        </p>
-      </div>
-
-      {/* logo */}
-      <div className="absolute left-3 top-3">
-        <MyLogo />
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

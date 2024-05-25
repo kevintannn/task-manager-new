@@ -1,5 +1,9 @@
 import CloseIcon from "@mui/icons-material/Close";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { authActions } from "../store/authSlice";
+import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
+import { uiActions } from "../store/uiSlice";
 import {
   validateConfirmPassword,
   validateContactNumber,
@@ -10,11 +14,8 @@ import {
   validatePassword,
   validateUsername,
 } from "../utils/validations";
-import { useDispatch, useSelector } from "react-redux";
-import { authActions } from "../store/authSlice";
-import useEnterKeyPressEffect from "../hooks/useEnterKeyPressEffect";
-import { FormControlLabel, Radio, RadioGroup } from "@mui/material";
-import { uiActions } from "../store/uiSlice";
+import axios from "axios";
+import { firebaseRealtimeDatabaseURL } from "../constants";
 
 const EditProfile = () => {
   const user = useSelector((state) => state.auth.user);
@@ -40,10 +41,9 @@ const EditProfile = () => {
   const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmNewPasswordError, setConfirmNewPasswordError] = useState("");
 
-  const saveRef = useRef(null);
   const imageInputRef = useRef(null);
 
-  const saveProfile = () => {
+  const saveProfile = async () => {
     if (
       nameError ||
       emailError ||
@@ -85,35 +85,23 @@ const EditProfile = () => {
       return;
     }
 
-    // update user
-    const existingUsersJSON = localStorage.getItem("users");
-    const existingUsers = existingUsersJSON
-      ? JSON.parse(localStorage.getItem("users")).map((item) => {
-          if (item.id == user.id) {
-            return {
-              ...item,
-              name,
-              email,
-              username,
-              contactNumber,
-              gender,
-            };
-          }
-
-          return item;
-        })
-      : [];
-
-    const existingUser = existingUsers.find((item) => item.id == user.id);
+    // firebase
+    const newProfile = {
+      name,
+      email,
+      username,
+      contactNumber,
+      gender,
+    };
 
     // check for fields that changed
     const changedFields = [];
-    Object.keys(existingUser).forEach((element) => {
+    Object.keys(newProfile).forEach((element) => {
       if (element === "password") {
         return;
       }
 
-      if (existingUser[element] !== user[element]) {
+      if (newProfile[element] !== user[element]) {
         changedFields.push(element);
       }
     });
@@ -155,23 +143,116 @@ const EditProfile = () => {
       return;
     }
 
-    const { password, ...userWithoutPassword } = existingUser;
+    // update user
+    await axios
+      .patch(`${firebaseRealtimeDatabaseURL}/users/${user.id}.json`, newProfile)
+      .then((res) => {
+        if (res.data) {
+          localStorage.setItem(
+            "user",
+            JSON.stringify({ ...user, ...newProfile }),
+          );
 
-    localStorage.setItem("users", JSON.stringify(existingUsers));
-    localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+          dispatch(authActions.login({ ...user, ...newProfile }));
 
-    dispatch(authActions.login(userWithoutPassword));
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Profile saved!",
+              open: true,
+            }),
+          );
+        }
+      })
+      .catch((err) => console.log(err));
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Profile saved!",
-        open: true,
-      }),
-    );
+    // local storage
+    // const existingUsersJSON = localStorage.getItem("users");
+    // const existingUsers = existingUsersJSON
+    //   ? JSON.parse(localStorage.getItem("users")).map((item) => {
+    //       if (item.id == user.id) {
+    //         return {
+    //           ...item,
+    //           name,
+    //           email,
+    //           username,
+    //           contactNumber,
+    //           gender,
+    //         };
+    //       }
+
+    //       return item;
+    //     })
+    //   : [];
+
+    // const existingUser = existingUsers.find((item) => item.id == user.id);
+
+    // // check for fields that changed
+    // const changedFields = [];
+    // Object.keys(existingUser).forEach((element) => {
+    //   if (element === "password") {
+    //     return;
+    //   }
+
+    //   if (existingUser[element] !== user[element]) {
+    //     changedFields.push(element);
+    //   }
+    // });
+
+    // // check if email is taken
+    // if (changedFields.includes("email")) {
+    //   const existEmail = users.find((item) => item.email === email);
+
+    //   if (existEmail) {
+    //     setEmailError("This email is used!");
+    //     flag = 1;
+    //   }
+    // }
+
+    // // check if username is taken
+    // if (changedFields.includes("username")) {
+    //   const existUsername = users.find((item) => item.username === username);
+
+    //   if (existUsername) {
+    //     setUsernameError("Username is not available!");
+    //     flag = 1;
+    //   }
+    // }
+
+    // if (flag === 1) {
+    //   return;
+    // }
+
+    // // if no changed field
+    // if (changedFields.length === 0) {
+    //   dispatch(
+    //     uiActions.setNotification({
+    //       type: "error",
+    //       message: "No field is changed!",
+    //       open: true,
+    //     }),
+    //   );
+
+    //   return;
+    // }
+
+    // const { password, ...userWithoutPassword } = existingUser;
+
+    // localStorage.setItem("users", JSON.stringify(existingUsers));
+    // localStorage.setItem("user", JSON.stringify(userWithoutPassword));
+
+    // dispatch(authActions.login(userWithoutPassword));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Profile saved!",
+    //     open: true,
+    //   }),
+    // );
   };
 
-  const changePassword = () => {
+  const changePassword = async () => {
     if (oldPasswordError || newPasswordError || confirmNewPasswordError) {
       return;
     }
@@ -197,39 +278,78 @@ const EditProfile = () => {
       return;
     }
 
+    // firebase
     // check if old password is correct
-    if (users.find((item) => item.id == user.id).password !== oldPassword) {
+    let userFromDatabase = null;
+
+    await axios
+      .get(`${firebaseRealtimeDatabaseURL}/users/${user.id}.json`)
+      .then((res) => {
+        if (res.data) {
+          userFromDatabase = res.data;
+        }
+      })
+      .catch((err) => console.log(err));
+
+    if (oldPassword !== userFromDatabase.password) {
       setOldPasswordError("Old password is incorrect!");
       return;
     }
 
-    const existingUsersJSON = localStorage.getItem("users");
-    const existingUsers = existingUsersJSON
-      ? JSON.parse(existingUsersJSON).map((item) => {
-          if (item.id == user.id) {
-            return { ...item, password: newPassword };
-          }
+    // update password
+    await axios
+      .patch(`${firebaseRealtimeDatabaseURL}/users/${user.id}.json`, {
+        password: newPassword,
+      })
+      .then((res) => {
+        if (res.data) {
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Password changed!",
+              open: true,
+            }),
+          );
 
-          return item;
-        })
-      : [];
+          setOldPassword("");
+          setNewPassword("");
+          setConfirmNewPassword("");
+        }
+      })
+      .catch((err) => console.log(err));
 
-    localStorage.setItem("users", JSON.stringify(existingUsers));
+    // local storage
+    // // check if old password is correct
+    // if (users.find((item) => item.id == user.id).password !== oldPassword) {
+    //   setOldPasswordError("Old password is incorrect!");
+    //   return;
+    // }
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Password changed!",
-        open: true,
-      }),
-    );
+    // const existingUsersJSON = localStorage.getItem("users");
+    // const existingUsers = existingUsersJSON
+    //   ? JSON.parse(existingUsersJSON).map((item) => {
+    //       if (item.id == user.id) {
+    //         return { ...item, password: newPassword };
+    //       }
 
-    setOldPassword("");
-    setNewPassword("");
-    setConfirmNewPassword("");
+    //       return item;
+    //     })
+    //   : [];
+
+    // localStorage.setItem("users", JSON.stringify(existingUsers));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Password changed!",
+    //     open: true,
+    //   }),
+    // );
+
+    // setOldPassword("");
+    // setNewPassword("");
+    // setConfirmNewPassword("");
   };
-
-  useEnterKeyPressEffect(saveRef);
 
   useEffect(() => {
     setUsers(
@@ -355,7 +475,6 @@ const EditProfile = () => {
                       imageInputRef.current.value = "";
                     }}
                   >
-                    {/* TODO: continue register function */}
                     <CloseIcon className="text-red-600" />
                   </div>
                 </>
@@ -392,8 +511,7 @@ const EditProfile = () => {
         </div>
 
         <button
-          ref={saveRef}
-          className="my-5 rounded-md bg-blue-700 p-3  text-white"
+          className="my-5 rounded-md bg-blue-700 p-3 text-white"
           onClick={saveProfile}
         >
           Save Profile

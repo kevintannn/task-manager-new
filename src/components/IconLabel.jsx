@@ -47,7 +47,7 @@ const IconLabel = ({
     <div
       className={clsx(
         cname,
-        `${iconTypes[type]?.color ?? "text-gray-600"} ${hoverable ? "cursor-pointer text-gray-500 hover:text-gray-700" : "cursor-default text-gray-600"} flex items-center gap-2`,
+        `${iconTypes[type]?.color ?? "text-gray-600"} ${hoverable ? "cursor-pointer text-gray-700 hover:text-gray-500" : "cursor-default text-gray-700"} flex items-center gap-2`,
       )}
     >
       <div className="-mt-0.5">

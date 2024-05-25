@@ -13,7 +13,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { uiActions } from "../store/uiSlice";
 import { format } from "date-fns";
 import { taskActions } from "../store/taskSlice";
-import { createActivity } from "../utils";
+import { createActivity, getDatasFromAxios } from "../utils";
+import axios from "axios";
+import { firebaseRealtimeDatabaseURL } from "../constants";
+import Loading from "../components/Loading";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -39,18 +42,19 @@ const EditTask = () => {
   const [title, setTitle] = useState(task?.title);
   const [priority, setPriority] = useState(task?.priority);
   const [division, setDivision] = useState(task?.division);
-  const [selectedPeople, setSelectedPeople] = useState(task.people.slice(1));
-  const [description, setDescription] = useState(task.description);
+  const [selectedPeople, setSelectedPeople] = useState(task?.people.slice(1));
+  const [description, setDescription] = useState(task?.description);
   const [startDate, setStartDate] = useState(
-    format(task.startDateTime, "yyyy-MM-dd") +
+    format(task?.startDateTime, "yyyy-MM-dd") +
       "T" +
-      format(task.startDateTime, "HH:mm"),
+      format(task?.startDateTime, "HH:mm"),
   );
   const [endDate, setEndDate] = useState(
-    format(task.endDateTime, "yyyy-MM-dd") +
+    format(task?.endDateTime, "yyyy-MM-dd") +
       "T" +
-      format(task.endDateTime, "HH:mm"),
+      format(task?.endDateTime, "HH:mm"),
   );
+  const [loading, setLoading] = useState(true);
 
   const [titleError, setTitleError] = useState(null);
   const [priorityError, setPriorityError] = useState(null);
@@ -65,7 +69,7 @@ const EditTask = () => {
     setSelectedPeopleError(validateTaskPeople(e.target.value));
   };
 
-  const handleEditTask = () => {
+  const handleEditTask = async () => {
     if (
       title === "" ||
       priority === "-1" ||
@@ -107,77 +111,124 @@ const EditTask = () => {
       return;
     }
 
-    // update database
-    const existingTasksJSON = localStorage.getItem("tasks");
-    const existingTasks = existingTasksJSON
-      ? JSON.parse(existingTasksJSON).map((item) => {
-          if (item.id == task.id) {
-            return {
-              ...item,
-              title,
-              description,
-              priority: priority.toLowerCase(),
-              division,
-              people: [task.people[0], ...selectedPeople],
-              startDateTime: startDate,
-              endDateTime: endDate,
-              updatedBy: user.id,
-              updatedAt: new Date(),
-            };
+    // firebase
+    setLoading(true);
+
+    const updatedTask = {
+      title,
+      description,
+      priority: priority.toLowerCase(),
+      division,
+      people: [task?.people[0], ...selectedPeople],
+      startDateTime: startDate,
+      endDateTime: endDate,
+      updatedBy: user.id,
+      updatedAt: new Date(),
+    };
+
+    await axios
+      .post(`${firebaseRealtimeDatabaseURL}/tasks/${id}.json`, updatedTask)
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(taskActions.modifyTask({ id: id, properties: updatedTask }));
+
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Task updated!",
+              open: true,
+            }),
+          );
+
+          // check if title is updated
+          if (task.title !== updatedTask.title) {
+            await createActivity(
+              user.id,
+              `updated task title from "${task.title}" to "${updatedTask.title}".`,
+            );
           }
 
-          return item;
-        })
-      : [];
+          await createActivity(
+            user.id,
+            `updated the details of "${updatedTask.title}" task.`,
+          );
 
-    localStorage.setItem("tasks", JSON.stringify(existingTasks));
-    dispatch(taskActions.replaceTasks(existingTasks));
+          setLoading(false);
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Task updated!",
-        open: true,
-      }),
-    );
+          return navigate(-1);
+        }
+      })
+      .catch((err) => console.log(err));
 
-    const existingTask = existingTasks.find((item) => item.id == task.id);
+    // local storage
+    // const existingTasksJSON = localStorage.getItem("tasks");
+    // const existingTasks = existingTasksJSON
+    //   ? JSON.parse(existingTasksJSON).map((item) => {
+    //       if (item.id == task?.id) {
+    //         return {
+    //           ...item,
+    //           title,
+    //           description,
+    //           priority: priority.toLowerCase(),
+    //           division,
+    //           people: [task?.people[0], ...selectedPeople],
+    //           startDateTime: startDate,
+    //           endDateTime: endDate,
+    //           updatedBy: user.id,
+    //           updatedAt: new Date(),
+    //         };
+    //       }
 
-    createActivity(
-      user.id,
-      `updated the details of "${existingTask.title}" task.`,
-    );
+    //       return item;
+    //     })
+    //   : [];
 
-    // check if title is updated
-    if (task.title !== existingTask.title) {
-      createActivity(
-        user.id,
-        `updated task title from "${task.title}" to "${existingTask.title}".`,
-      );
-    }
+    // localStorage.setItem("tasks", JSON.stringify(existingTasks));
+    // dispatch(taskActions.replaceTasks(existingTasks));
 
-    return navigate(-1);
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "Task updated!",
+    //     open: true,
+    //   }),
+    // );
+
+    // const existingTask = existingTasks.find((item) => item.id == task?.id);
+
+    // createActivity(
+    //   user.id,
+    //   `updated the details of "${existingTask?.title}" task?.`,
+    // );
+
+    // // check if title is updated
+    // if (task?.title !== existingTask?.title) {
+    //   createActivity(
+    //     user.id,
+    //     `updated task title from "${task?.title}" to "${existingTask?.title}".`,
+    //   );
+    // }
+
+    // return navigate(-1);
   };
 
   useEffect(() => {
-    setDivisions(
-      localStorage.getItem("divisions")
-        ? JSON.parse(localStorage.getItem("divisions"))
-        : [],
-    );
+    setLoading(true);
 
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const fetchData = async () => {
+      setDivisions(await getDatasFromAxios("divisions"));
+      setUsers(await getDatasFromAxios("users"));
+    };
+    fetchData().finally(() => setLoading(false));
   }, []);
 
-  return (
-    <div className="flex h-full flex-col justify-center gap-5">
+  return loading ? (
+    <Loading />
+  ) : (
+    <div className="mx-10 flex h-full flex-col justify-center gap-5">
       <h1 className="text-2xl font-bold">Edit Task</h1>
 
-      <div className="flex justify-center gap-5 rounded-xl bg-blue-50/50  p-10">
+      <div className="flex justify-center gap-5 rounded-xl bg-blue-50 p-10">
         {/* left section */}
         <div className="flex w-[700px] flex-col gap-3">
           <div className="flex flex-col gap-1">
@@ -266,7 +317,7 @@ const EditTask = () => {
               MenuProps={MenuProps}
             >
               {users
-                .filter((item) => item.id != task.people[0])
+                ?.filter((item) => item.id != task?.people[0])
                 .map((item) => (
                   <MenuItem key={item.id} value={item.id}>
                     <Checkbox checked={selectedPeople.indexOf(item.id) > -1} />

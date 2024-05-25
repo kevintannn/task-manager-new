@@ -12,7 +12,10 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { taskActions } from "../store/taskSlice";
 import { uiActions } from "../store/uiSlice";
-import { createActivity } from "../utils";
+import { createActivity, getDatasFromAxios } from "../utils";
+import axios from "axios";
+import { firebaseRealtimeDatabaseURL } from "../constants";
+import Loading from "../components/Loading";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -37,6 +40,7 @@ const CreateTask = () => {
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [titleError, setTitleError] = useState(null);
   const [priorityError, setPriorityError] = useState(null);
@@ -93,9 +97,10 @@ const CreateTask = () => {
       return;
     }
 
-    // insert into database
+    // firebase
+    setLoading(true);
+
     const newTask = {
-      id: Math.ceil(Math.random() * 999) + 100,
       title,
       description,
       priority: priority,
@@ -109,48 +114,87 @@ const CreateTask = () => {
       createdAt: new Date(),
     };
 
-    const existingTasksJSON = localStorage.getItem("tasks");
-    const existingTasks = existingTasksJSON
-      ? JSON.parse(existingTasksJSON)
-      : [];
+    axios
+      .post(`${firebaseRealtimeDatabaseURL}/tasks.json`, newTask)
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(taskActions.addTask({ id: res.data.name, ...newTask }));
 
-    existingTasks.push(newTask);
-    localStorage.setItem("tasks", JSON.stringify(existingTasks));
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "New task created!",
+              open: true,
+            }),
+          );
 
-    dispatch(taskActions.addTask(newTask));
+          await createActivity(user.id, `created "${title}" task.`);
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "New task created!",
-        open: true,
-      }),
-    );
+          setLoading(false);
 
-    createActivity(user.id, `created "${title}" task.`);
+          return navigate("/");
+        }
+      })
+      .catch((err) => console.log(err));
 
-    return navigate("/");
+    // // insert into database
+    // const newTask = {
+    //   id: Math.ceil(Math.random() * 999) + 100,
+    //   title,
+    //   description,
+    //   priority: priority,
+    //   division,
+    //   people: [user.id, ...selectedPeople],
+    //   startDateTime: startDate,
+    //   endDateTime: endDate,
+    //   completed: false,
+    //   completedBy: null,
+    //   createdBy: user.id,
+    //   createdAt: new Date(),
+    // };
+
+    // const existingTasksJSON = localStorage.getItem("tasks");
+    // const existingTasks = existingTasksJSON
+    //   ? JSON.parse(existingTasksJSON)
+    //   : [];
+
+    // existingTasks.push(newTask);
+    // localStorage.setItem("tasks", JSON.stringify(existingTasks));
+
+    // dispatch(taskActions.addTask(newTask));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "New task created!",
+    //     open: true,
+    //   }),
+    // );
+
+    // createActivity(user.id, `created "${title}" task.`);
+
+    // return navigate("/");
   };
 
   useEffect(() => {
-    setDivisions(
-      localStorage.getItem("divisions")
-        ? JSON.parse(localStorage.getItem("divisions"))
-        : [],
-    );
+    const getDivisions = async () => {
+      setDivisions(await getDatasFromAxios("divisions"));
+    };
+    getDivisions();
 
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers();
   }, []);
 
-  return (
-    <div className="mt-5 flex flex-col gap-5">
+  return loading ? (
+    <Loading />
+  ) : (
+    <div className="mx-10 mt-5 flex flex-col gap-5">
       <h1 className="text-2xl font-bold">Create New Task</h1>
 
-      <div className="flex justify-center gap-5 rounded-xl bg-blue-50/50  p-10">
+      <div className="flex justify-center gap-5 rounded-xl bg-blue-50/50 p-10">
         {/* left section */}
         <div className="flex w-[700px] flex-col gap-3">
           <div className="flex flex-col gap-1">
@@ -240,7 +284,7 @@ const CreateTask = () => {
               MenuProps={MenuProps}
             >
               {users
-                .filter((item) => item.id !== user.id)
+                ?.filter((item) => item.id !== user.id)
                 .map((item) => (
                   <MenuItem key={item.id} value={item.id}>
                     <Checkbox checked={selectedPeople.indexOf(item.id) > -1} />
