@@ -2,12 +2,15 @@ import { Box, Paper } from "@mui/material";
 import Person from "../components/Person";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { getDatasFromAxios } from "../utils";
+import Loading from "../components/Loading";
 
 const Completion = () => {
   const tasks = useSelector((state) => state.task.tasks);
   const projects = useSelector((state) => state.project.projects);
 
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const countCompletedTasks = tasks.filter((item) => item.completed).length;
   const countCompletedProjects = projects.filter(
@@ -15,14 +18,17 @@ const Completion = () => {
   ).length;
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
+
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="mt-5 flex flex-col items-center justify-center gap-10 pb-10">
       {/* header */}
       <h1 className="text-3xl font-bold">Completion Progress</h1>

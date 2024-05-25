@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { projectTypes } from "../data";
 import PrimaryButton from "../components/PrimaryButton";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,6 +20,10 @@ import {
   RadioGroup,
   Select,
 } from "@mui/material";
+import { createActivity, getDatasFromAxios } from "../utils";
+import axios from "axios";
+import { firebaseRealtimeDatabaseURL } from "../constants";
+import Loading from "../components/Loading";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -37,12 +40,14 @@ const CreateProject = () => {
   const dispatch = useDispatch();
 
   const [users, setUsers] = useState([]);
+  const [projectTypes, setProjectTypes] = useState([]);
   const [projectName, setProjectName] = useState("");
   const [deadline, setDeadline] = useState("");
   const [projectType, setProjectType] = useState("-1");
   const [selectedPeople, setSelectedPeople] = useState([]);
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("notstarted");
+  const [loading, setLoading] = useState(false);
 
   const [projectNameError, setProjectNameError] = useState(null);
   const [deadlineError, setDeadlineError] = useState(null);
@@ -56,7 +61,7 @@ const CreateProject = () => {
     setSelectedPeopleError(validateTaskPeople(e.target.value));
   };
 
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     if (
       projectName === "" ||
       deadline === "" ||
@@ -91,9 +96,10 @@ const CreateProject = () => {
       return;
     }
 
-    // insert into database
+    // firebase
+    setLoading(true);
+
     const newProject = {
-      id: Math.ceil(Math.random() * 999) + 100,
       projectName,
       deadline,
       projectType,
@@ -106,36 +112,82 @@ const CreateProject = () => {
       updatedAt: null,
     };
 
-    const existingProjectsJSON = localStorage.getItem("projects");
-    const existingProjects = existingProjectsJSON
-      ? JSON.parse(existingProjectsJSON)
-      : [];
+    await axios
+      .post(`${firebaseRealtimeDatabaseURL}/projects.json`, newProject)
+      .then(async (res) => {
+        if (res.data) {
+          dispatch(
+            projectActions.addProject({ id: res.data.name, ...newProject }),
+          );
 
-    existingProjects.push(newProject);
-    localStorage.setItem("projects", JSON.stringify(existingProjects));
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "New project created!",
+              open: true,
+            }),
+          );
 
-    dispatch(projectActions.addProject(newProject));
+          await createActivity(user.id, `created "${projectName}" project.`);
 
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "New project created!",
-        open: true,
-      }),
-    );
+          return navigate("/");
+        } else {
+          setLoading(false);
+        }
+      })
+      .catch((err) => console.log(err));
 
-    return navigate("/");
+    // insert into database
+    // const newProject = {
+    //   id: Math.ceil(Math.random() * 999) + 100,
+    //   projectName,
+    //   deadline,
+    //   projectType,
+    //   people: [user.id, ...selectedPeople],
+    //   description,
+    //   status,
+    //   createdBy: user.id,
+    //   createdAt: new Date(),
+    //   updatedBy: null,
+    //   updatedAt: null,
+    // };
+
+    // const existingProjectsJSON = localStorage.getItem("projects");
+    // const existingProjects = existingProjectsJSON
+    //   ? JSON.parse(existingProjectsJSON)
+    //   : [];
+
+    // existingProjects.push(newProject);
+    // localStorage.setItem("projects", JSON.stringify(existingProjects));
+
+    // dispatch(projectActions.addProject(newProject));
+
+    // dispatch(
+    //   uiActions.setNotification({
+    //     type: "success",
+    //     message: "New project created!",
+    //     open: true,
+    //   }),
+    // );
+
+    // return navigate("/");
   };
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    const getProjectTypes = async () => {
+      setProjectTypes(await getDatasFromAxios("projectTypes"));
+    };
+    getProjectTypes();
+
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers();
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="mx-10 mt-5 flex flex-col gap-5">
       <h1 className="text-2xl font-bold">Create Project</h1>
 
@@ -221,13 +273,15 @@ const CreateProject = () => {
               onChange={handlePeopleChange}
               renderValue={(selected) =>
                 selected
-                  .map((item) => users.find((item2) => item2.id === item).name)
+                  .map(
+                    (item) => users?.find((item2) => item2.id === item)?.name,
+                  )
                   .join(", ")
               }
               MenuProps={MenuProps}
             >
               {users
-                .filter((item) => item.id !== user.id)
+                ?.filter((item) => item.id !== user.id)
                 .map((item) => (
                   <MenuItem key={item.id} value={item.id}>
                     <Checkbox checked={selectedPeople.indexOf(item.id) > -1} />
