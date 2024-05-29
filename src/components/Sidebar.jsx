@@ -20,6 +20,18 @@ const sidebarLinks = [
 const Sidebar = () => {
   const { pathname } = useLocation();
 
+  const correctPathname = (link) => {
+    if (link === "/tasks" && pathname === "/projects") {
+      return true;
+    }
+
+    if (pathname === link) {
+      return true;
+    }
+
+    return false;
+  };
+
   return (
     <div className="fixed flex h-screen flex-col items-center justify-between p-5">
       {/* logo and sidebar links */}
@@ -35,7 +47,7 @@ const Sidebar = () => {
             <Link
               key={idx}
               to={item.link}
-              className={`${pathname === item.link ? "shadow-md" : "bg-blue-50"} flex h-fit w-fit items-center justify-center rounded-lg p-3 duration-150 hover:bg-white hover:shadow-md`}
+              className={`${correctPathname(item.link) ? "shadow-md" : "bg-blue-50"} flex h-fit w-fit items-center justify-center rounded-lg p-3 duration-150 hover:bg-white hover:shadow-md`}
             >
               {item.icon}
             </Link>
