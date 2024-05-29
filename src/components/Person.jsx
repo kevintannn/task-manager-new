@@ -26,9 +26,9 @@ const Person = ({ person, id, type, idx }) => {
   };
 
   useEffect(() => {
-    setLoading(true);
-
     if (!person && id) {
+      setLoading(true);
+
       axios
         .get(`${firebaseRealtimeDatabaseURL}/users/${id}.json`)
         .then((res) => {
