@@ -20,6 +20,8 @@ import axios from "axios";
 import { getDatasFromAxios } from "../utils";
 import { firebaseRealtimeDatabaseURL } from "../constants";
 import Loading from "../components/Loading";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "../firebase";
 
 const Register = () => {
   const auth = useSelector((state) => state.auth);
@@ -125,6 +127,23 @@ const Register = () => {
       return;
     }
 
+    // upload image if there is image
+    let imgPath = null;
+
+    if (image) {
+      await uploadBytes(ref(storage, `images/${image.name}`), image).then(
+        async () => {
+          console.log("image uploaded");
+
+          await getDownloadURL(ref(storage, `images/${image.name}`)).then(
+            (url) => {
+              imgPath = url;
+            },
+          );
+        },
+      );
+    }
+
     // get not assigned division id
     let notAssignedDivisionId = null;
 
@@ -156,7 +175,7 @@ const Register = () => {
       email,
       gender,
       contactNumber,
-      imgPath: null,
+      imgPath: imgPath,
       divisionId: notAssignedDivisionId,
       username,
       password,
