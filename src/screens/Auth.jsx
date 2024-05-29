@@ -174,9 +174,12 @@ const Auth = () => {
               )}
             </div>
 
-            <Link className="text-right font-bold text-blue-700 hover:underline">
+            <div
+              className="cursor-pointer text-right font-bold text-blue-700 hover:underline"
+              onClick={() => alert("Feature is being implemented...")}
+            >
               Forgot Password?
-            </Link>
+            </div>
 
             <button
               ref={loginRef}
