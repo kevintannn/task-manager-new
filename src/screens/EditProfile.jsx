@@ -16,6 +16,10 @@ import {
 } from "../utils/validations";
 import axios from "axios";
 import { firebaseRealtimeDatabaseURL } from "../constants";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { storage } from "../firebase";
+import { getDatasFromAxios } from "../utils";
+import Loading from "../components/Loading";
 
 const EditProfile = () => {
   const user = useSelector((state) => state.auth.user);
@@ -31,6 +35,7 @@ const EditProfile = () => {
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const [nameError, setNameError] = useState(null);
   const [emailError, setEmailError] = useState(null);
@@ -86,6 +91,8 @@ const EditProfile = () => {
     }
 
     // firebase
+    setLoading(true);
+
     const newProfile = {
       name,
       email,
@@ -93,6 +100,21 @@ const EditProfile = () => {
       contactNumber,
       gender,
     };
+
+    // upload image if there is image
+    if (image) {
+      await uploadBytes(ref(storage, `images/${image.name}`), image).then(
+        async () => {
+          console.log("image uploaded");
+
+          await getDownloadURL(ref(storage, `images/${image.name}`)).then(
+            (url) => {
+              newProfile.imgPath = url;
+            },
+          );
+        },
+      );
+    }
 
     // check for fields that changed
     const changedFields = [];
@@ -140,6 +162,7 @@ const EditProfile = () => {
         }),
       );
 
+      setLoading(false);
       return;
     }
 
@@ -162,9 +185,13 @@ const EditProfile = () => {
               open: true,
             }),
           );
+
+          setLoading(false);
         }
       })
       .catch((err) => console.log(err));
+
+    setImage(undefined);
 
     // local storage
     // const existingUsersJSON = localStorage.getItem("users");
@@ -352,14 +379,17 @@ const EditProfile = () => {
   };
 
   useEffect(() => {
-    setUsers(
-      localStorage.getItem("users")
-        ? JSON.parse(localStorage.getItem("users"))
-        : [],
-    );
+    setLoading(true);
+
+    const getUsers = async () => {
+      setUsers(await getDatasFromAxios("users"));
+    };
+    getUsers().finally(() => setLoading(false));
   }, []);
 
-  return (
+  return loading ? (
+    <Loading />
+  ) : (
     <div className="mt-20 flex items-center justify-center pb-20 text-sm">
       {/* box */}
       <div className="flex w-[700px] flex-col justify-center">
