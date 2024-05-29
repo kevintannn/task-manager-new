@@ -36,7 +36,7 @@ const People = () => {
 
   const navigate = useNavigate();
 
-  const filteredUsers = users.filter((item) => {
+  const filteredUsers = users?.filter((item) => {
     if (divisionFilterId === "-1") {
       return item;
     }

@@ -64,7 +64,7 @@ const TaskList = () => {
 
         {/* date and tasks */}
         {tasksByDateGroup.length <= 0 ? (
-          <div className="flex h-60 items-center justify-center rounded-xl text-gray-600">
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-700">
             <p>There is no task</p>
           </div>
         ) : (

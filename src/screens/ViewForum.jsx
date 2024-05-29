@@ -296,7 +296,20 @@ const ViewForum = () => {
               </p>
             </div>
 
-            <div className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-gray-300 p-2">
+            <div
+              className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-full border border-gray-300 p-2"
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+
+                dispatch(
+                  uiActions.setNotification({
+                    type: "success",
+                    message: "Link to discussion is copied.",
+                    open: true,
+                  }),
+                );
+              }}
+            >
               <ShareIcon fontSize="small" />
               <p className="text-sm font-semibold">Share</p>
             </div>

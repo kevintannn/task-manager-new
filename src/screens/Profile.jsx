@@ -100,12 +100,54 @@ const Profile = () => {
   };
 
   const editDivisionId = async () => {
+    if (user.divisionId == divisionId) {
+      dispatch(
+        uiActions.setNotification({
+          type: "error",
+          message: "Select a new division to change!",
+          open: true,
+        }),
+      );
+      return;
+    }
+
     // firebase
     axios
       .patch(`${firebaseRealtimeDatabaseURL}/users/${user.id}.json`, {
         divisionId,
       })
-      .then((res) => console.log(res.data))
+      .then(async (res) => {
+        if (res.data) {
+          // if user is myself
+          if (!id) {
+            localStorage.setItem(
+              "user",
+              JSON.stringify({ ...user, divisionId }),
+            );
+            dispatch(authActions.changeDivisionId(divisionId));
+
+            await createActivity(
+              myself.id,
+              `changed division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
+            );
+          } else {
+            await createActivity(
+              myself.id,
+              `changed ${user.name} division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
+            );
+          }
+
+          dispatch(
+            uiActions.setNotification({
+              type: "success",
+              message: "Division changed!",
+              open: true,
+            }),
+          );
+
+          setDisableDivisionSelect(true);
+        }
+      })
       .catch((err) => console.log(err));
 
     // local storage
@@ -121,32 +163,6 @@ const Profile = () => {
     //   : [];
 
     // localStorage.setItem("users", JSON.stringify(existingUsers));
-
-    // if user is myself
-    if (!id) {
-      localStorage.setItem("user", JSON.stringify({ ...user, divisionId }));
-      dispatch(authActions.changeDivisionId(divisionId));
-
-      await createActivity(
-        myself.id,
-        `changed division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
-      );
-    } else {
-      await createActivity(
-        myself.id,
-        `changed ${user.name} division from "${divisions.find((item) => item.id == user.divisionId).name}" to "${divisions.find((item) => item.id == divisionId).name}".`,
-      );
-    }
-
-    dispatch(
-      uiActions.setNotification({
-        type: "success",
-        message: "Division changed!",
-        open: true,
-      }),
-    );
-
-    setDisableDivisionSelect(true);
   };
 
   // check if user is myself
