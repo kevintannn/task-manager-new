@@ -178,6 +178,8 @@ const EditProfile = () => {
 
           dispatch(authActions.login({ ...user, ...newProfile }));
 
+          setLoading(false);
+
           dispatch(
             uiActions.setNotification({
               type: "success",
@@ -185,8 +187,6 @@ const EditProfile = () => {
               open: true,
             }),
           );
-
-          setLoading(false);
         }
       })
       .catch((err) => console.log(err));
