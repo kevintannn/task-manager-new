@@ -27,7 +27,7 @@ const ProjectList = () => {
 
         {/* projects */}
         {projects.length <= 0 ? (
-          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100">
+          <div className="flex h-60 items-center justify-center rounded-xl bg-blue-100 text-gray-700">
             <p>There is no project</p>
           </div>
         ) : (
