@@ -66,7 +66,7 @@ const Person = ({ person, id, type, idx }) => {
         className="h-10 w-10 rounded-full object-cover"
       />
 
-      <div className="flex w-full items-center justify-between">
+      <div className="flex flex-1 items-center justify-between">
         <div className="flex flex-col">
           <p className="text-sm font-bold">{statePerson?.name}</p>
           <p className="text-xs text-gray-600">
