@@ -179,7 +179,9 @@ const ViewTask = () => {
           {/* lower */}
           <div className="rounded-lg bg-blue-100">
             <p className="p-5 text-justify leading-6 tracking-wide">
-              {task.description}
+              {task.description
+                ? task.description
+                : "No description available."}
             </p>
           </div>
         </div>

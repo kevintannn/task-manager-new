@@ -134,7 +134,9 @@ const ViewProject = () => {
           {/* lower */}
           <div className="rounded-lg bg-blue-100">
             <p className="p-5 text-justify leading-6 tracking-wide">
-              {project.description}
+              {project.description
+                ? project.description
+                : "No description available."}
             </p>
           </div>
         </div>
