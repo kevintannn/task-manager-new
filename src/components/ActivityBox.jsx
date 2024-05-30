@@ -52,7 +52,7 @@ const ActivityBox = ({ activities, cname, limit, showModal, closeModal }) => {
                 className="h-10 w-10 self-start rounded-lg object-cover"
               />
 
-              <div className="flex flex-col gap-1 text-gray-500">
+              <div className="flex flex-1 flex-col gap-1 text-gray-500">
                 <p>
                   <span className="font-bold text-black">
                     {
